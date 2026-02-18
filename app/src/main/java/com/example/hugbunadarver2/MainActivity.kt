@@ -37,7 +37,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 @PreviewScreenSizes
 @Composable
 fun Hugbunadarver2App() {
