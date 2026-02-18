@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
 
 class MainActivity : ComponentActivity() {
@@ -40,18 +41,20 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun Hugbunadarver2App() {
+    var token by rememberSaveable { mutableStateOf<String?>(null) }
+
+    if (token == null) {
+        LoginRoute(onLoggedIn = { token = it })
+        return
+    }
+
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
                 item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
-                    },
+                    icon = { Icon(it.icon, contentDescription = it.label) },
                     label = { Text(it.label) },
                     selected = it == currentDestination,
                     onClick = { currentDestination = it }
@@ -60,10 +63,7 @@ fun Hugbunadarver2App() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
+            Text("Logged in!", modifier = Modifier.padding(innerPadding))
         }
     }
 }
@@ -91,4 +91,5 @@ fun GreetingPreview() {
     Hugbunadarver2Theme {
         Greeting("Android")
     }
+
 }
