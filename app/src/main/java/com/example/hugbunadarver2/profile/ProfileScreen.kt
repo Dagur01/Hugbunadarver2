@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,7 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 
     @Composable
-    fun ProfileRoute(userId: String, token: String) {
+    fun ProfileRoute(userId: String, token: String, onNavigateToEditProfile: () -> Unit) {
         val vm: ProfileViewModel = viewModel()
 
         LaunchedEffect(Unit) {
@@ -33,7 +34,8 @@ import coil.compose.AsyncImage
         }
 
         ProfileScreen(
-            state = vm.state
+            state = vm.state,
+            onEditProfile = onNavigateToEditProfile
         )
     }
 
@@ -41,6 +43,7 @@ import coil.compose.AsyncImage
     @Composable
     fun ProfileScreen(
         state: ProfileState,
+        onEditProfile: () -> Unit
     ) {
         Column(
             modifier = Modifier
@@ -60,45 +63,48 @@ import coil.compose.AsyncImage
                     contentScale = ContentScale.Crop
                 )
             } else {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = state.username.firstOrNull()?.uppercase() ?: "?",
+                        style = MaterialTheme.typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Button(onClick = onEditProfile) {
+                    Text("Edit Profile")
+                }
+                Spacer(Modifier.height(24.dp))
+
+                // Username
                 Text(
-                    text = state.username.firstOrNull()?.uppercase() ?: "?",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    text = state.username,
+                    style = MaterialTheme.typography.headlineMedium
                 )
+
+                Spacer(Modifier.height(8.dp))
+
+                // Email
+                Text(
+                    text = state.email,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                if (state.loading) {
+                    Spacer(Modifier.height(16.dp))
+                    CircularProgressIndicator()
+                }
+
+                state.error?.let {
+                    Spacer(Modifier.height(16.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
-            Spacer(Modifier.height(24.dp))
-
-        // Username
-        Text(
-            text = state.username,
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Email
-        Text(
-            text = state.email,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        if (state.loading) {
-            Spacer(Modifier.height(16.dp))
-            CircularProgressIndicator()
-        }
-
-        state.error?.let {
-            Spacer(Modifier.height(16.dp))
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
-    }
     }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hugbunadarver2.network.ApiClient
 import com.example.hugbunadarver2.network.ApiService
+import com.example.hugbunadarver2.network.UpdateUsernameRequest
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
@@ -35,6 +36,31 @@ class ProfileViewModel : ViewModel() {
                 state = state.copy(
                     loading = false,
                     error = "Failed to load profile: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * TODO laga routing aftur a profile skja ekki home
+     * */
+    fun updateUsername(token: String, newUsername: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            state = state.copy(loading = true, error = null)
+            try {
+                ApiClient.setToken(token)
+                ApiClient.api.updateUsername(UpdateUsernameRequest(newUsername))
+
+                state = state.copy(
+                    username = newUsername,
+                    loading = false
+                )
+                onSuccess()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                state = state.copy(
+                    loading = false,
+                    error = "Failed to update username: ${e.message}"
                 )
             }
         }

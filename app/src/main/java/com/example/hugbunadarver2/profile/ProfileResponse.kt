@@ -11,3 +11,8 @@ data class ProfileResponse(
     val profilePictureBase64: String?
         get() = profilePictureUrl?.split(",")?.getOrNull(1)
 }
+
+data class UpdateUsernameRequest(val username: String)
+data class UpdateUsernameResponse(val username: String)
+
+
