@@ -23,8 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
+import com.example.hugbunadarver2.profile.ProfileRoute
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,11 +67,20 @@ fun Hugbunadarver2App() {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Text("Logged in!", modifier = Modifier.padding(innerPadding))
+        when (currentDestination) {
+            AppDestinations.HOME -> {
+                Text("Home Screen")
+            }
+            AppDestinations.FAVORITES -> {
+                Text("Favorites Screen")
+            }
+            AppDestinations.PROFILE -> {
+                ProfileRoute(userId = "currentUserId", token = token!!)
+            }
         }
     }
 }
+
 
 enum class AppDestinations(
     val label: String,
@@ -92,3 +107,4 @@ fun GreetingPreview() {
     }
 
 }
+
