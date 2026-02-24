@@ -4,14 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -25,6 +22,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
+import com.example.hugbunadarver2.profile.ProfileRoute
+import com.example.hugbunadarver2.profile.EditProfileRoute
+
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,9 +43,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Hugbunadarver2App() {
     var token by rememberSaveable { mutableStateOf<String?>(null) }
+    var showEditProfile by rememberSaveable { mutableStateOf(false) }
 
     if (token == null) {
         LoginRoute(onLoggedIn = { token = it })
+        return
+    }
+
+    if (showEditProfile) {
+        EditProfileRoute(
+            token = token!!,
+            currentUsername = "", // You'll need to pass the actual username
+            onNavigateBack = { showEditProfile = false }
+        )
         return
     }
 
@@ -61,11 +73,24 @@ fun Hugbunadarver2App() {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Text("Logged in!", modifier = Modifier.padding(innerPadding))
+        when (currentDestination) {
+            AppDestinations.HOME -> {
+                Text("Home Screen")
+            }
+            AppDestinations.FAVORITES -> {
+                Text("Favorites Screen")
+            }
+            AppDestinations.PROFILE -> {
+                ProfileRoute(
+                    userId = "currentUserId",
+                    token = token!!,
+                    onNavigateToEditProfile = { showEditProfile = true }
+                )
+            }
         }
     }
 }
+
 
 enum class AppDestinations(
     val label: String,
@@ -92,3 +117,4 @@ fun GreetingPreview() {
     }
 
 }
+
