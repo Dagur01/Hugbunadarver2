@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.hugbunadarver2.auth.LoginRoute
+import com.example.hugbunadarver2.auth.SignUpRoute
 import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
 import com.example.hugbunadarver2.profile.ProfileRoute
 import com.example.hugbunadarver2.profile.EditProfileRoute
@@ -43,10 +44,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Hugbunadarver2App() {
     var token by rememberSaveable { mutableStateOf<String?>(null) }
+    var showSignUp by rememberSaveable { mutableStateOf(false) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
 
     if (token == null) {
-        LoginRoute(onLoggedIn = { token = it })
+        if (showSignUp) {
+            SignUpRoute(
+                onSignedUp = { token = it },
+                onBackToLogin = { showSignUp = false }
+            )
+        } else {
+            LoginRoute(
+                onLoggedIn = { token = it },
+                onGoToSignUp = { showSignUp = true }
+            )
+        }
         return
     }
 

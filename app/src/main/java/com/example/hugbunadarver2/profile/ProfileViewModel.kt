@@ -11,56 +11,82 @@ import com.example.hugbunadarver2.network.UpdateUsernameRequest
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
+
     var state by mutableStateOf(ProfileState())
         private set
 
     fun loadUserProfile(token: String) {
         viewModelScope.launch {
             state = state.copy(loading = true, error = null)
+
             try {
-                println("DEBUG: Token being used: ${token.take(20)}...") // Log first 20 chars
                 ApiClient.setToken(token)
+
                 val response = ApiClient.api.getUserProfile()
 
-                state = state.copy(
-                    username = response.username,
-                    email = response.email,
-                    profilePictureUrl = response.profilePictureBase64?.let {
-                        "data:image/jpeg;base64,$it"
-                    },
-                    loading = false
-                )
+                if (response.isSuccessful && response.body() != null) {
+                    val profile = response.body()!!
+
+                    state = state.copy(
+                        username = profile.username,
+                        email = profile.email,
+                        profilePictureUrl = profile.profilePictureBase64?.let {
+                            "data:image/jpeg;base64,$it"
+                        },
+                        loading = false
+                    )
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = response.errorBody()?.string()
+                            ?: "Failed to load profile"
+                    )
+                }
+
             } catch (e: Exception) {
-                println("DEBUG: Error details: ${e.message}")
                 e.printStackTrace()
                 state = state.copy(
                     loading = false,
-                    error = "Failed to load profile: ${e.message}"
+                    error = "Network error: ${e.message}"
                 )
             }
         }
     }
 
-    /**
-     * TODO laga routing aftur a profile skja ekki home
-     * */
-    fun updateUsername(token: String, newUsername: String, onSuccess: () -> Unit) {
+    fun updateUsername(
+        token: String,
+        newUsername: String,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch {
             state = state.copy(loading = true, error = null)
+
             try {
                 ApiClient.setToken(token)
-                ApiClient.api.updateUsername(UpdateUsernameRequest(newUsername))
 
-                state = state.copy(
-                    username = newUsername,
-                    loading = false
+                val response = ApiClient.api.updateUsername(
+                    UpdateUsernameRequest(newUsername)
                 )
-                onSuccess()
+
+                if (response.isSuccessful) {
+                    state = state.copy(
+                        username = newUsername,
+                        loading = false
+                    )
+                    onSuccess()
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = response.errorBody()?.string()
+                            ?: "Failed to update username"
+                    )
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 state = state.copy(
                     loading = false,
-                    error = "Failed to update username: ${e.message}"
+                    error = "Network error: ${e.message}"
                 )
             }
         }
