@@ -53,7 +53,7 @@ fun Hugbunadarver2App() {
     if (showEditProfile) {
         EditProfileRoute(
             token = token!!,
-            currentUsername = "", // You'll need to pass the actual username
+            currentUsername = "",
             onNavigateBack = { showEditProfile = false }
         )
         return
