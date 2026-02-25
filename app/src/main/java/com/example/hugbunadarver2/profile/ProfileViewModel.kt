@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.hugbunadarver2.network.ApiClient
 import com.example.hugbunadarver2.network.UpdateUsernameRequest
 import kotlinx.coroutines.launch
-import com.example.hugbunadarver2.network.UploadPictureRequest
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -31,7 +30,6 @@ class ProfileViewModel : ViewModel() {
                     username = response.username,
                     email = response.email,
                     profilePictureUrl = response.profilePictureBase64?.let {
-                        println("DEBUG: Setting profilePictureUrl with base64 length: ${it.length}")
                         "data:image/jpeg;base64,$it"
                     } ?: state.profilePictureUrl,
                     loading = false
@@ -93,8 +91,6 @@ class ProfileViewModel : ViewModel() {
                     return@launch
                 }
 
-                println("DEBUG: Image size: ${bytes.size} bytes")
-
                 val mimeType = context.contentResolver.getType(imageUri) ?: "image/jpeg"
 
                 // Convert to Base64 for local display
@@ -110,23 +106,16 @@ class ProfileViewModel : ViewModel() {
                     requestBody
                 )
 
-                println("DEBUG: Sending multipart request...")
                 ApiClient.api.uploadProfilePicture(filePart)
-                println("DEBUG: Upload successful")
 
-                // Update state with the local image AFTER successful upload
                 state = state.copy(
                     profilePictureUrl = "data:$mimeType;base64,$base64String",
                     loading = false
                 )
 
-                println("DEBUG: State updated with local image")
-
-                // Call onSuccess AFTER state update
                 onSuccess()
 
             } catch (e: Exception) {
-                println("DEBUG: Upload error: ${e.message}")
                 e.printStackTrace()
                 state = state.copy(
                     loading = false,

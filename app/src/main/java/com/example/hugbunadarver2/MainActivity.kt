@@ -44,6 +44,7 @@ class MainActivity : ComponentActivity() {
 fun Hugbunadarver2App() {
     var token by rememberSaveable { mutableStateOf<String?>(null) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     if (token == null) {
         LoginRoute(onLoggedIn = { token = it })
@@ -54,12 +55,13 @@ fun Hugbunadarver2App() {
         EditProfileRoute(
             token = token!!,
             currentUsername = "",
-            onNavigateBack = { showEditProfile = false }
+            onNavigateBack = {
+                showEditProfile = false
+                currentDestination = AppDestinations.PROFILE
+            }
         )
         return
     }
-
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {

@@ -32,10 +32,14 @@ fun EditProfileRoute(
         loading = vm.state.loading,
         error = vm.state.error,
         onSave = { newUsername ->
-            vm.updateUsername(token, newUsername, onNavigateBack)
+            vm.updateUsername(token, newUsername) {
+                onNavigateBack()
+            }
         },
         onUploadPicture = { uri ->
-            vm.uploadProfilePicture(token, uri, context, onNavigateBack)
+            vm.uploadProfilePicture(token, uri, context) {
+                onNavigateBack()
+            }
         },
         onCancel = onNavigateBack
     )
