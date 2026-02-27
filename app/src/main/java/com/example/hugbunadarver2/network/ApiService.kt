@@ -33,4 +33,7 @@ interface ApiService {
     @PATCH("profile/profile")
     suspend fun updateUsername(@Body req: UpdateUsernameRequest): Response<UpdateUsernameResponse>
 
+    @PATCH("profile/profile/picture")
+    suspend fun uploadProfilePicture(@Body req: UploadPictureRequest): Response<Unit>
+
 }

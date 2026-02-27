@@ -1,5 +1,3 @@
 package com.example.hugbunadarver2.network
 
-data class UploadPictureRequest(
-    val profile_picture: String
-)
+data class UploadPictureRequest(val imageBase64: String)
