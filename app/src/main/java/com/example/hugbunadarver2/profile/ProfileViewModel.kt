@@ -1,125 +1,143 @@
 package com.example.hugbunadarver2.profile
 
-import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hugbunadarver2.network.ApiClient
+import com.example.hugbunadarver2.network.ApiService
 import com.example.hugbunadarver2.network.UpdateUsernameRequest
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
+import android.content.Context
+import android.net.Uri
+import android.util.Base64
+import com.example.hugbunadarver2.network.UploadPictureRequest
 
 
 class ProfileViewModel : ViewModel() {
+
     var state by mutableStateOf(ProfileState())
         private set
 
     fun loadUserProfile(token: String) {
         viewModelScope.launch {
             state = state.copy(loading = true, error = null)
+
             try {
                 ApiClient.setToken(token)
+
                 val response = ApiClient.api.getUserProfile()
 
-                state = state.copy(
-                    username = response.username,
-                    email = response.email,
-                    profilePictureUrl = response.profilePictureBase64?.let {
-                        "data:image/jpeg;base64,$it"
-                    } ?: state.profilePictureUrl,
-                    loading = false
-                )
+                if (response.isSuccessful && response.body() != null) {
+                    val profile = response.body()!!
+
+                    state = state.copy(
+                        username = profile.username,
+                        email = profile.email,
+                        profilePictureUrl = profile.profilePictureBase64?.let {
+                            "data:image/jpeg;base64,$it"
+                        },
+                        loading = false
+                    )
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = response.errorBody()?.string()
+                            ?: "Failed to load profile"
+                    )
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 state = state.copy(
                     loading = false,
-                    error = "Failed to load profile: ${e.message}"
+                    error = "Network error: ${e.message}"
                 )
             }
         }
     }
 
-
-    /**
-     * TODO laga routing aftur a profile skja ekki home
-     * */
-    fun updateUsername(token: String, newUsername: String, onSuccess: () -> Unit) {
+    fun updateUsername(
+        token: String,
+        newUsername: String,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch {
             state = state.copy(loading = true, error = null)
+
             try {
                 ApiClient.setToken(token)
-                ApiClient.api.updateUsername(UpdateUsernameRequest(newUsername))
 
-                state = state.copy(
-                    username = newUsername,
-                    loading = false
+                val response = ApiClient.api.updateUsername(
+                    UpdateUsernameRequest(newUsername)
                 )
-                onSuccess()
+
+                if (response.isSuccessful) {
+                    state = state.copy(
+                        username = newUsername,
+                        loading = false
+                    )
+                    onSuccess()
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = response.errorBody()?.string()
+                            ?: "Failed to update username"
+                    )
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 state = state.copy(
                     loading = false,
-                    error = "Failed to update username: ${e.message}"
+                    error = "Network error: ${e.message}"
                 )
             }
         }
     }
-
     fun uploadProfilePicture(
         token: String,
-        imageUri: Uri,
+        uri: Uri,
         context: Context,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
             state = state.copy(loading = true, error = null)
+
             try {
-                println("DEBUG: Starting picture upload")
                 ApiClient.setToken(token)
 
-                val inputStream = context.contentResolver.openInputStream(imageUri)
-                val bytes = inputStream?.readBytes()
-                inputStream?.close()
+                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: run {
+                        state = state.copy(loading = false, error = "Could not read image")
+                        return@launch
+                    }
 
-                if (bytes == null) {
-                    state = state.copy(loading = false, error = "Failed to read image")
-                    return@launch
+                // Base64 encode (NO_WRAP svo þetta verði ein lína)
+                val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+
+                // Sumir backend vilja bara base64 streng, aðrir vilja data-url.
+                // Prófaðu fyrst bara base64:
+                val res = ApiClient.api.uploadProfilePicture(
+                    UploadPictureRequest(base64)
+                )
+
+                if (res.isSuccessful) {
+                    state = state.copy(loading = false)
+                    onSuccess()
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = res.errorBody()?.string() ?: "Upload failed"
+                    )
                 }
-
-                val mimeType = context.contentResolver.getType(imageUri) ?: "image/jpeg"
-
-                // Convert to Base64 for local display
-                val base64String = android.util.Base64.encodeToString(
-                    bytes,
-                    android.util.Base64.NO_WRAP
-                )
-
-                val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
-                val filePart = MultipartBody.Part.createFormData(
-                    "file",
-                    "profile.jpg",
-                    requestBody
-                )
-
-                ApiClient.api.uploadProfilePicture(filePart)
-
-                state = state.copy(
-                    profilePictureUrl = "data:$mimeType;base64,$base64String",
-                    loading = false
-                )
-
-                onSuccess()
 
             } catch (e: Exception) {
                 e.printStackTrace()
                 state = state.copy(
                     loading = false,
-                    error = "Failed to upload picture: ${e.message}"
+                    error = "Upload failed: ${e.message}"
                 )
             }
         }
