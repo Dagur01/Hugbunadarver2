@@ -46,6 +46,7 @@ fun Hugbunadarver2App() {
     var token by rememberSaveable { mutableStateOf<String?>(null) }
     var showSignUp by rememberSaveable { mutableStateOf(false) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     if (token == null) {
         if (showSignUp) {
@@ -65,13 +66,14 @@ fun Hugbunadarver2App() {
     if (showEditProfile) {
         EditProfileRoute(
             token = token!!,
-            currentUsername = "", // You'll need to pass the actual username
-            onNavigateBack = { showEditProfile = false }
+            currentUsername = "",
+            onNavigateBack = {
+                showEditProfile = false
+                currentDestination = AppDestinations.PROFILE
+            }
         )
         return
     }
-
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
