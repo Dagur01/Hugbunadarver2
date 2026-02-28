@@ -9,28 +9,30 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun LoginRoute(
-    onLoggedIn: (String) -> Unit,
-    onGoToSignUp: () -> Unit
+fun SignUpRoute(
+    onSignedUp: (String) -> Unit,
+    onBackToLogin: () -> Unit
 ) {
-    val vm: LoginViewModel = viewModel()
+    val vm: SignUpViewModel = viewModel()
 
-    LoginScreen(
+    SignUpScreen(
         state = vm.state,
         onEmailChange = vm::onEmailChange,
         onPasswordChange = vm::onPasswordChange,
-        onLoginClick = { vm.login(onLoggedIn) },
-        onGoToSignUp = onGoToSignUp
+        onConfirmPasswordChange = vm::onConfirmPasswordChange,
+        onSignUpClick = { vm.signUp(onSignedUp) },
+        onBackToLogin = onBackToLogin
     )
 }
 
 @Composable
-fun LoginScreen(
-    state: LoginState,
+fun SignUpScreen(
+    state: SignUpState,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onGoToSignUp: () -> Unit
+    onConfirmPasswordChange: (String) -> Unit,
+    onSignUpClick: () -> Unit,
+    onBackToLogin: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -38,7 +40,7 @@ fun LoginScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Innskráning", style = MaterialTheme.typography.headlineSmall)
+        Text("Create account", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(Modifier.height(12.dp))
 
@@ -46,8 +48,8 @@ fun LoginScreen(
             value = state.email,
             onValueChange = onEmailChange,
             label = { Text("Email") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Spacer(Modifier.height(8.dp))
@@ -55,28 +57,35 @@ fun LoginScreen(
         OutlinedTextField(
             value = state.password,
             onValueChange = onPasswordChange,
-            label = { Text("Lykilorð") },
-            singleLine = true,
+            label = { Text("Password (min 8 chars)") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = state.confirmPassword,
+            onValueChange = onConfirmPasswordChange,
+            label = { Text("Confirm password") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Spacer(Modifier.height(12.dp))
 
         Button(
-            onClick = onLoginClick,
+            onClick = onSignUpClick,
             enabled = !state.loading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (state.loading) "Skrái inn..." else "Skrá inn")
+            Text(if (state.loading) "Creating..." else "Create account")
         }
 
-
-        TextButton(
-            onClick = onGoToSignUp,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Búa til aðgang")
+        TextButton(onClick = onBackToLogin) {
+            Text("Back to login")
         }
 
         state.error?.let {
