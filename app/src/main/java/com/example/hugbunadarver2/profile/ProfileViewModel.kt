@@ -114,11 +114,8 @@ class ProfileViewModel : ViewModel() {
                         return@launch
                     }
 
-                // Base64 encode (NO_WRAP svo þetta verði ein lína)
                 val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
 
-                // Sumir backend vilja bara base64 streng, aðrir vilja data-url.
-                // Prófaðu fyrst bara base64:
                 val res = ApiClient.api.uploadProfilePicture(
                     UploadPictureRequest(base64)
                 )
