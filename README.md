@@ -1,6 +1,6 @@
 # Verkefnið felst í þróun á kvikmyndahúsaappi með Spring Boot bakenda og Android framenda.
 
-## Á þessu stigi verkefnisins:
+## Á þessu stigi verkefnisins
 
 Bakendinn er keyrandi og hýstur á Render.
 
@@ -16,7 +16,7 @@ Profile gerir kleift að skoða og uppfæra notendanafn og mynd.
 
 Grunnvirkni kerfisins er því komin í gang og samskipti milli framenda og bakenda virka vel.
 
-## Samvinna og verkaskipting: 
+## Samvinna og verkaskipting 
 
 Samvinna og verkaskipting gengur vel, við leggjum áherslu á: 
 
@@ -28,11 +28,9 @@ Villuleit og keyrsluvandamál.
 
 Forgangsröðun næstu verkefna.
 
-Helstu áskoranir
+## Helstu áskoranir
 
-## Við höfum mætt áskorunum í þróunarferlinu:
-
-Til dæmis notaði bakendinn movieId á meðan framendinn notaði id. Þetta olli röngum hegðunum í UI (t.d. allar myndir merktust sem „favorite“).
+Við höfum mætt áskorunum í þróunarferlinu eins og til dæmis notaði bakendinn movieId á meðan framendinn notaði id. Þetta olli röngum hegðunum í UI (t.d. allar myndir merktust sem „favorite“).
 
 ## Mat á stöðu teymisins og vinna framundan
 
