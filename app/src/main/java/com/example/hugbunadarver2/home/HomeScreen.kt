@@ -19,20 +19,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 
 @Composable
 fun HomeRoute() {
     val vm: HomeViewModel = viewModel()
     HomeScreen(
         state = vm.state,
-        onRetry = vm::loadMovies
+        onRetry = vm::loadMovies,
+        onToggleFavorite = vm::toggleFavorite
     )
 }
 
 @Composable
 fun HomeScreen(
     state: HomeState,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onToggleFavorite: (Long) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -68,8 +73,15 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.movies) { movie ->
-                        MovieCard(movie = movie)
+                    items(
+                        items = state.movies,
+                        key = { it.movieId }
+                    ) { movie ->
+                        MovieCard(
+                            movie = movie,
+                            isFavorite = state.favoriteIds.contains(movie.movieId),
+                            onToggleFavorite = { onToggleFavorite(movie.movieId) }
+                        )
                     }
                 }
             }
@@ -78,39 +90,59 @@ fun HomeScreen(
 }
 
 @Composable
-fun MovieCard(movie: Movie) {
+fun MovieCard(
+    movie: Movie,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-            // Poster image
-            val bitmap = movie.posterBase64?.let { base64 ->
-                try {
-                    val bytes = Base64.decode(base64, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                } catch (e: Exception) { null }
-            }
 
-            if (bitmap != null) {
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = movie.title,
+            Box {
+                // Poster image
+                val bitmap = movie.posterBase64?.let { base64 ->
+                    try {
+                        val bytes = Base64.decode(base64, Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    } catch (e: Exception) { null }
+                }
+
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = movie.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Movie Picture", style = MaterialTheme.typography.displayMedium)
+                    }
+                }
+
+
+                IconButton(
+                    onClick = onToggleFavorite,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
                 ) {
-                    Text("Movie Picture", style = MaterialTheme.typography.displayMedium)
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = "Toggle favorite"
+                    )
                 }
             }
 
@@ -136,7 +168,7 @@ fun MovieCard(movie: Movie) {
                 ) {
                     movie.ageRating?.let {
                         Text(
-                            text = it,
+                            text = it.toString(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -153,3 +185,4 @@ fun MovieCard(movie: Movie) {
         }
     }
 }
+

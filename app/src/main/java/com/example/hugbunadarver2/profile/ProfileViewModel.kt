@@ -46,7 +46,7 @@ class ProfileViewModel : ViewModel() {
                 } else {
                     state = state.copy(
                         loading = false,
-                        error = null // Don't show error for missing data
+                        error = null
                     )
                 }
 
