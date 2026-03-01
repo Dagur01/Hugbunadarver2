@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 
 data class HomeState(
     val movies: List<Movie> = emptyList(),
+    val favoriteIds: Set<Long> = emptySet(),
     val loading: Boolean = false,
     val error: String? = null
 )
@@ -39,5 +40,12 @@ class HomeViewModel : ViewModel() {
                 state = state.copy(loading = false, error = "Network error: ${e.message}")
             }
         }
+    }
+    fun toggleFavorite(movieId: Long) {
+        val newSet =
+            if (state.favoriteIds.contains(movieId)) state.favoriteIds - movieId
+            else state.favoriteIds + movieId
+
+        state = state.copy(favoriteIds = newSet)
     }
 }
