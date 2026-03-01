@@ -29,14 +29,14 @@ interface ApiService {
     @POST("auth/signup")
     suspend fun signUp(@Body req: SignUpRequest): Response<AuthResponse>
 
-    @GET("auth/profile")
+    @GET("profile/profile")
     suspend fun getUserProfile(): Response<ProfileResponse>
 
-    @PATCH("auth/profile")
+    @PATCH("profile/profile")
     suspend fun updateUsername(@Body req: UpdateUsernameRequest): ResponseBody
 
     @Multipart
-    @PATCH("auth/profile/picture")
+    @PATCH("profile/profile/picture")
     suspend fun uploadProfilePicture(@Part file: MultipartBody.Part): ResponseBody
 
     // Movies
