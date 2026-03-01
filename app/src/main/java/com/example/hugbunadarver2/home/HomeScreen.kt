@@ -101,7 +101,7 @@ fun MovieCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-            // ✅ Setjum mynd + hjarta í Box svo hjartað geti verið "ofan á"
+
             Box {
                 // Poster image
                 val bitmap = movie.posterBase64?.let { base64 ->
@@ -132,7 +132,7 @@ fun MovieCard(
                     }
                 }
 
-                // ❤️ Favorite toggle
+
                 IconButton(
                     onClick = onToggleFavorite,
                     modifier = Modifier

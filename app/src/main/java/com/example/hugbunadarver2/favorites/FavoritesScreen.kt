@@ -38,7 +38,7 @@ fun FavoritesScreen(
     ) {
         items(
             items = favMovies,
-            key = { it.movieId } // gott að hafa
+            key = { it.movieId }
         ) { movie ->
             MovieCard(
                 movie = movie,
