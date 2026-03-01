@@ -1,5 +1,6 @@
 package com.example.hugbunadarver2.network
 
+import com.example.hugbunadarver2.home.Movie
 import com.example.hugbunadarver2.profile.ProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -20,15 +21,13 @@ data class AuthResponse(val token: String)
 data class UpdateUsernameRequest(val username: String)
 data class UpdateUsernameResponse(val username: String)
 
-
-
 interface ApiService {
 
-        @POST("auth/login")
-        suspend fun login(@Body req: LoginRequest): Response<LoginResponse>
+    @POST("auth/login")
+    suspend fun login(@Body req: LoginRequest): Response<LoginResponse>
 
-        @POST("auth/signup")
-        suspend fun signUp(@Body req: SignUpRequest): Response<AuthResponse>
+    @POST("auth/signup")
+    suspend fun signUp(@Body req: SignUpRequest): Response<AuthResponse>
 
     @GET("profile/profile")
     suspend fun getUserProfile(): Response<ProfileResponse>
@@ -40,4 +39,10 @@ interface ApiService {
     @PATCH("profile/profile/picture")
     suspend fun uploadProfilePicture(@Part file: MultipartBody.Part): ResponseBody
 
+    // Movies
+    @GET("movies")
+    suspend fun getMovies(): Response<List<Movie>>
+
+    @GET("movies/{id}")
+    suspend fun getMovieById(@Path("id") id: Int): Response<Movie>
 }

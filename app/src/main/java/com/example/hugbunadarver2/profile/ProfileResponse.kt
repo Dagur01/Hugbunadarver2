@@ -4,12 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProfileResponse(
-    val email: String,
-    val username: String,
+    val email: String? = null,
+    val username: String? = null,
     val profilePictureUrl: String? = null
 ) {
     val profilePictureBase64: String?
-        get() = profilePictureUrl?.split(",")?.getOrNull(1)
+        get() = profilePictureUrl?.takeIf { it.isNotEmpty() }?.split(",")?.getOrNull(1)
 }
 
 data class UpdateUsernameRequest(val username: String)

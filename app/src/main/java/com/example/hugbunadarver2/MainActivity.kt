@@ -16,18 +16,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.auth.SignUpRoute
-import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
-import com.example.hugbunadarver2.profile.ProfileRoute
+import com.example.hugbunadarver2.home.HomeRoute
+import com.example.hugbunadarver2.network.ApiClient
 import com.example.hugbunadarver2.profile.EditProfileRoute
-
-
-
+import com.example.hugbunadarver2.profile.ProfileRoute
+import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +37,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @PreviewScreenSizes
 @Composable
 fun Hugbunadarver2App() {
@@ -56,7 +54,10 @@ fun Hugbunadarver2App() {
             )
         } else {
             LoginRoute(
-                onLoggedIn = { token = it },
+                onLoggedIn = { newToken ->
+                    ApiClient.setToken(newToken)
+                    token = newToken
+                },
                 onGoToSignUp = { showSignUp = true }
             )
         }
@@ -88,23 +89,16 @@ fun Hugbunadarver2App() {
         }
     ) {
         when (currentDestination) {
-            AppDestinations.HOME -> {
-                Text("Home Screen")
-            }
-            AppDestinations.FAVORITES -> {
-                Text("Favorites Screen")
-            }
-            AppDestinations.PROFILE -> {
-                ProfileRoute(
-                    userId = "currentUserId",
-                    token = token!!,
-                    onNavigateToEditProfile = { showEditProfile = true }
-                )
-            }
+            AppDestinations.HOME -> HomeRoute()
+            AppDestinations.FAVORITES -> Text("Favorites Screen")
+            AppDestinations.PROFILE -> ProfileRoute(
+                userId = "currentUserId",
+                token = token!!,
+                onNavigateToEditProfile = { showEditProfile = true }
+            )
         }
     }
 }
-
 
 enum class AppDestinations(
     val label: String,
@@ -114,21 +108,3 @@ enum class AppDestinations(
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Hugbunadarver2Theme {
-        Greeting("Android")
-    }
-
-}
-

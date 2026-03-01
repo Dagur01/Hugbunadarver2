@@ -36,18 +36,17 @@ class ProfileViewModel : ViewModel() {
                     val profile = response.body()!!
 
                     state = state.copy(
-                        username = profile.username,
-                        email = profile.email,
+                        username = profile.username?.ifEmpty { "" } ?: "",
+                        email = profile.email?.ifEmpty { "" } ?: "",
                         profilePictureUrl = profile.profilePictureBase64?.let {
-                            "data:image/jpeg;base64,$it"
+                            if (it.isNotEmpty()) "data:image/jpeg;base64,$it" else null
                         } ?: state.profilePictureUrl,
                         loading = false
                     )
                 } else {
                     state = state.copy(
                         loading = false,
-                        error = response.errorBody()?.string()
-                            ?: "Failed to load profile"
+                        error = null // Don't show error for missing data
                     )
                 }
 
