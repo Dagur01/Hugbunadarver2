@@ -6,5 +6,6 @@ data class Movie(
     val genre: String?,
     val ageRating: Int?,
     val duration: Long?,
+    val nowShowing: Boolean? = null,
     val posterBase64: String?
 )

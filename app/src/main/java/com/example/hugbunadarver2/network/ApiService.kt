@@ -12,6 +12,7 @@ import retrofit2.http.Path
 import retrofit2.Response
 import retrofit2.http.Multipart
 import retrofit2.http.Part
+import retrofit2.http.DELETE
 
 data class LoginRequest(val email: String, val password: String)
 data class LoginResponse(val token: String)
@@ -45,4 +46,13 @@ interface ApiService {
 
     @GET("movies/{id}")
     suspend fun getMovieById(@Path("id") id: Int): Response<Movie>
+
+    @GET("favorites")
+    suspend fun getFavorites(): Response<List<Movie>>
+
+    @POST("favorites/{movieId}")
+    suspend fun addFavorite(@Path("movieId") movieId: Long): Response<Unit>
+
+    @DELETE("favorites/{movieId}")
+    suspend fun removeFavorite(@Path("movieId") movieId: Long): Response<Unit>
 }

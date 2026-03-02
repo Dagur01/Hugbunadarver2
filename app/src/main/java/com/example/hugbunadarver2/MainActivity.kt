@@ -48,12 +48,18 @@ fun Hugbunadarver2App() {
     var showSignUp by rememberSaveable { mutableStateOf(false) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-    val homeVm: HomeViewModel = viewModel()  // einn VM fyrir bæði HOME og FAVORITES
+    val homeVm: HomeViewModel = viewModel()
 
     if (token == null) {
         if (showSignUp) {
             SignUpRoute(
-                onSignedUp = { token = it },
+                onSignedUp = { newToken ->
+                    ApiClient.setToken(newToken)
+                    token = newToken
+
+                    homeVm.loadMovies()
+                    homeVm.loadFavorites()
+                },
                 onBackToLogin = { showSignUp = false }
             )
         } else {
@@ -61,6 +67,9 @@ fun Hugbunadarver2App() {
                 onLoggedIn = { newToken ->
                     ApiClient.setToken(newToken)
                     token = newToken
+
+                    homeVm.loadMovies()
+                    homeVm.loadFavorites()
                 },
                 onGoToSignUp = { showSignUp = true }
             )
