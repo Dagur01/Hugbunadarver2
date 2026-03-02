@@ -1,5 +1,6 @@
 package com.example.hugbunadarver2
 
+import FavoritesScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,9 +19,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.auth.SignUpRoute
-import com.example.hugbunadarver2.home.HomeRoute
+import com.example.hugbunadarver2.home.HomeScreen
+import com.example.hugbunadarver2.home.HomeViewModel
 import com.example.hugbunadarver2.network.ApiClient
 import com.example.hugbunadarver2.profile.EditProfileRoute
 import com.example.hugbunadarver2.profile.ProfileRoute
@@ -45,11 +48,18 @@ fun Hugbunadarver2App() {
     var showSignUp by rememberSaveable { mutableStateOf(false) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    val homeVm: HomeViewModel = viewModel()
 
     if (token == null) {
         if (showSignUp) {
             SignUpRoute(
-                onSignedUp = { token = it },
+                onSignedUp = { newToken ->
+                    ApiClient.setToken(newToken)
+                    token = newToken
+
+                    homeVm.loadMovies()
+                    homeVm.loadFavorites()
+                },
                 onBackToLogin = { showSignUp = false }
             )
         } else {
@@ -57,6 +67,9 @@ fun Hugbunadarver2App() {
                 onLoggedIn = { newToken ->
                     ApiClient.setToken(newToken)
                     token = newToken
+
+                    homeVm.loadMovies()
+                    homeVm.loadFavorites()
                 },
                 onGoToSignUp = { showSignUp = true }
             )
@@ -89,8 +102,16 @@ fun Hugbunadarver2App() {
         }
     ) {
         when (currentDestination) {
-            AppDestinations.HOME -> HomeRoute()
-            AppDestinations.FAVORITES -> Text("Favorites Screen")
+            AppDestinations.HOME -> HomeScreen(
+                state = homeVm.state,
+                onRetry = homeVm::loadMovies,
+                onToggleFavorite = homeVm::toggleFavorite
+            )
+            AppDestinations.FAVORITES -> FavoritesScreen(
+                movies = homeVm.state.movies,
+                favoriteIds = homeVm.state.favoriteIds,
+                onToggleFavorite = homeVm::toggleFavorite
+            )
             AppDestinations.PROFILE -> ProfileRoute(
                 userId = "currentUserId",
                 token = token!!,
