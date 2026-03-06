@@ -40,7 +40,6 @@ interface ApiService {
     @PATCH("profile/profile/picture")
     suspend fun uploadProfilePicture(@Part file: MultipartBody.Part): ResponseBody
 
-    // Movies
     @GET("movies")
     suspend fun getMovies(): Response<List<Movie>>
 
@@ -55,4 +54,9 @@ interface ApiService {
 
     @DELETE("favorites/{movieId}")
     suspend fun removeFavorite(@Path("movieId") movieId: Long): Response<Unit>
+
+    @GET("movies/genre/{genre}")
+    suspend fun getMoviesByGenre(
+        @Path("genre") genre: String
+    ): Response<List<Movie>>
 }
