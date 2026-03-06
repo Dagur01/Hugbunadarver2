@@ -22,7 +22,8 @@ import coil.compose.rememberAsyncImagePainter
 fun EditProfileRoute(
     token: String,
     currentUsername: String,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val vm: ProfileViewModel = viewModel()
     val context = LocalContext.current
@@ -43,6 +44,7 @@ fun EditProfileRoute(
         },
         onCancel = onNavigateBack
     )
+
 }
 
 @Composable

@@ -11,9 +11,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun LoginRoute(
     onLoggedIn: (String) -> Unit,
-    onGoToSignUp: () -> Unit
+    onGoToSignUp: () -> Unit,
+    resetKey: Int = 0
 ) {
-    val vm: LoginViewModel = viewModel()
+    val vm: LoginViewModel = viewModel(key = "login-$resetKey")
 
     LoginScreen(
         state = vm.state,

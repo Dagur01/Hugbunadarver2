@@ -15,6 +15,16 @@ object ApiClient {
         authToken = token
     }
 
+    fun clearToken() {
+        authToken = null
+    }
+
+    fun deleteAccount() {
+        authToken = null
+    }
+
+
+
     private val authInterceptor = Interceptor { chain ->
         val request = chain.request().newBuilder()
 
