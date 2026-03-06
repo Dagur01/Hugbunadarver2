@@ -26,12 +26,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-    fun ProfileRoute(userId: String, token: String, onNavigateToEditProfile: () -> Unit) {
+    fun ProfileRoute(
+        userId: String,
+        token: String,
+        onNavigateToEditProfile: () -> Unit,
+        onLogout: () -> Unit
+    ) {
         val vm: ProfileViewModel = viewModel()
 
         LaunchedEffect(Unit) {
@@ -40,15 +46,25 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
         ProfileScreen(
             state = vm.state,
-            onEditProfile = onNavigateToEditProfile
+            onEditProfile = onNavigateToEditProfile,
+            onLogout = {
+                vm.logout(onLogout)
+            },
+            onDeleteAccount = {
+                vm.deleteAccount(token, onSuccess = onLogout)
+            }
         )
     }
+
+
 
     @SuppressLint("NotConstructor")
     @Composable
     fun ProfileScreen(
         state: ProfileState,
-        onEditProfile: () -> Unit
+        onEditProfile: () -> Unit,
+        onLogout: () -> Unit,
+        onDeleteAccount: () -> Unit
     ) {
         Column(
             modifier = Modifier
@@ -117,6 +133,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(Modifier.height(24.dp))
+
+            // Logout Button
+            Button(
+                onClick = onLogout,
+                enabled = !state.loading
+            ) {
+                Text("Logout")
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Delete Account Button
+            Button(
+                onClick = onDeleteAccount,
+                enabled = !state.loading,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Delete Account")
+            }
 
             if (state.loading) {
                 Spacer(Modifier.height(16.dp))
