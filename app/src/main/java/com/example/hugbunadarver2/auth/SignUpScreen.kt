@@ -11,9 +11,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SignUpRoute(
     onSignedUp: (String) -> Unit,
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit,
+    resetKey: Int = 0
 ) {
-    val vm: SignUpViewModel = viewModel()
+    val vm: SignUpViewModel = viewModel(key = "signup-$resetKey")
 
     SignUpScreen(
         state = vm.state,

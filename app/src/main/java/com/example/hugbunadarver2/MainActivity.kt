@@ -47,6 +47,7 @@ fun Hugbunadarver2App() {
     var token by rememberSaveable { mutableStateOf<String?>(null) }
     var showSignUp by rememberSaveable { mutableStateOf(false) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
+    var authUiResetKey by rememberSaveable { mutableStateOf(0) }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val homeVm: HomeViewModel = viewModel()
 
@@ -60,7 +61,8 @@ fun Hugbunadarver2App() {
                     homeVm.loadMovies()
                     homeVm.loadFavorites()
                 },
-                onBackToLogin = { showSignUp = false }
+                onBackToLogin = { showSignUp = false },
+                resetKey = authUiResetKey
             )
         } else {
             LoginRoute(
@@ -71,7 +73,8 @@ fun Hugbunadarver2App() {
                     homeVm.loadMovies()
                     homeVm.loadFavorites()
                 },
-                onGoToSignUp = { showSignUp = true }
+                onGoToSignUp = { showSignUp = true },
+                resetKey = authUiResetKey
             )
         }
         return
@@ -84,6 +87,14 @@ fun Hugbunadarver2App() {
             onNavigateBack = {
                 showEditProfile = false
                 currentDestination = AppDestinations.PROFILE
+            },
+            onLogout = {
+                token = null
+                ApiClient.clearToken()
+                showSignUp = false
+                showEditProfile = false
+                currentDestination = AppDestinations.HOME
+                authUiResetKey++
             }
         )
         return
@@ -105,7 +116,8 @@ fun Hugbunadarver2App() {
             AppDestinations.HOME -> HomeScreen(
                 state = homeVm.state,
                 onRetry = homeVm::loadMovies,
-                onToggleFavorite = homeVm::toggleFavorite
+                onToggleFavorite = homeVm::toggleFavorite,
+                onFilterGenre = homeVm::loadMoviesByGenre
             )
             AppDestinations.FAVORITES -> FavoritesScreen(
                 movies = homeVm.state.movies,
@@ -115,7 +127,14 @@ fun Hugbunadarver2App() {
             AppDestinations.PROFILE -> ProfileRoute(
                 userId = "currentUserId",
                 token = token!!,
-                onNavigateToEditProfile = { showEditProfile = true }
+                onNavigateToEditProfile = { showEditProfile = true },
+                onLogout = {
+                    token = null
+                    ApiClient.clearToken()
+                    showSignUp = false
+                    currentDestination = AppDestinations.HOME
+                    authUiResetKey++
+                }
             )
         }
     }

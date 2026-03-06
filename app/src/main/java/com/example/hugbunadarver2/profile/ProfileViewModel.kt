@@ -81,6 +81,7 @@ class ProfileViewModel : ViewModel() {
             }
         }
     }
+
     fun uploadProfilePicture(
         token: String,
         imageUri: Uri,
@@ -134,5 +135,30 @@ class ProfileViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    fun logout(onLoggedOut: () -> Unit) {
+        state = ProfileState()
+        ApiClient.clearToken()
+        onLoggedOut()
+    }
+
+    fun deleteAccount(token: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            state = state.copy(loading = true, error = null)
+            try {
+                ApiClient.setToken(token)
+                ApiClient.api.deleteAccount()
+
+                logout(onSuccess)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                state = state.copy(
+                    loading = false,
+                    error = "Failed to delete account"
+                )
+            }
+        }
+
     }
 }
