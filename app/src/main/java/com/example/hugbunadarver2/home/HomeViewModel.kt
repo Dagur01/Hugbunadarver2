@@ -81,4 +81,32 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
+
+    fun loadMoviesByGenre(genre: String) {
+        viewModelScope.launch {
+            state = state.copy(loading = true, error = null)
+
+            try {
+                val response = ApiClient.api.getMoviesByGenre(genre)
+
+                if (response.isSuccessful && response.body() != null) {
+                    state = state.copy(
+                        movies = response.body()!!,
+                        loading = false
+                    )
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = response.errorBody()?.string() ?: "Failed to filter movies"
+                    )
+                }
+
+            } catch (e: Exception) {
+                state = state.copy(
+                    loading = false,
+                    error = "Network error: ${e.message}"
+                )
+            }
+        }
+    }
 }

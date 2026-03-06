@@ -22,6 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.runtime.*
+
 
 @Composable
 fun HomeRoute() {
@@ -29,7 +31,8 @@ fun HomeRoute() {
     HomeScreen(
         state = vm.state,
         onRetry = vm::loadMovies,
-        onToggleFavorite = vm::toggleFavorite
+        onToggleFavorite = vm::toggleFavorite,
+        onFilterGenre = vm::loadMoviesByGenre
     )
 }
 
@@ -37,51 +40,88 @@ fun HomeRoute() {
 fun HomeScreen(
     state: HomeState,
     onRetry: () -> Unit,
-    onToggleFavorite: (Long) -> Unit
+    onToggleFavorite: (Long) -> Unit,
+    onFilterGenre: (String) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        when {
-            state.loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            state.error != null -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = state.error,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    Button(onClick = onRetry) {
-                        Text("Retry")
-                    }
-                }
-            }
-            state.movies.isEmpty() -> {
-                Text(
-                    text = "No movies available",
-                    modifier = Modifier.align(Alignment.Center)
+    val genres = listOf("Action", "Drama", "Comedy", "Sci-Fi", "Horror")
+    var selectedGenre by remember { mutableStateOf<String?>(null) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = selectedGenre == null,
+                onClick = {
+                    selectedGenre = null
+                    onRetry()
+                },
+                label = { Text("All") }
+            )
+
+            genres.forEach { genre ->
+                FilterChip(
+                    selected = selectedGenre == genre,
+                    onClick = {
+                        selectedGenre = genre
+                        onFilterGenre(genre)
+                    },
+                    label = { Text(genre) }
                 )
             }
-            else -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(
-                        items = state.movies,
-                        key = { it.movieId }
-                    ) { movie ->
-                        MovieCard(
-                            movie = movie,
-                            isFavorite = state.favoriteIds.contains(movie.movieId),
-                            onToggleFavorite = { onToggleFavorite(movie.movieId) }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                state.loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+
+                state.error != null -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = state.error,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp)
                         )
+                        Button(onClick = onRetry) {
+                            Text("Retry")
+                        }
+                    }
+                }
+
+                state.movies.isEmpty() -> {
+                    Text(
+                        text = "No movies available",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                else -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(
+                            items = state.movies,
+                            key = { it.movieId }
+                        ) { movie ->
+                            MovieCard(
+                                movie = movie,
+                                isFavorite = state.favoriteIds.contains(movie.movieId),
+                                onToggleFavorite = { onToggleFavorite(movie.movieId) }
+                            )
+                        }
                     }
                 }
             }

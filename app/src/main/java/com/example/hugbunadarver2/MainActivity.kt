@@ -116,7 +116,8 @@ fun Hugbunadarver2App() {
             AppDestinations.HOME -> HomeScreen(
                 state = homeVm.state,
                 onRetry = homeVm::loadMovies,
-                onToggleFavorite = homeVm::toggleFavorite
+                onToggleFavorite = homeVm::toggleFavorite,
+                onFilterGenre = homeVm::loadMoviesByGenre
             )
             AppDestinations.FAVORITES -> FavoritesScreen(
                 movies = homeVm.state.movies,
