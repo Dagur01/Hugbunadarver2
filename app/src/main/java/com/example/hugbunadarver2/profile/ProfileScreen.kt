@@ -40,7 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
     ) {
         val vm: ProfileViewModel = viewModel()
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(token) {
             vm.loadUserProfile(token)
         }
 
@@ -131,6 +131,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
             Text(
                 text = state.email,
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = "Role: ${state.userRole}",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
