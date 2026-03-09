@@ -2,6 +2,7 @@ package com.example.hugbunadarver2
 
 import FavoritesScreen
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.hugbunadarver2.admin.AdminRoute
 import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.auth.SignUpRoute
 import com.example.hugbunadarver2.home.HomeScreen
@@ -28,6 +31,7 @@ import com.example.hugbunadarver2.network.ApiClient
 import com.example.hugbunadarver2.profile.EditProfileRoute
 import com.example.hugbunadarver2.profile.ProfileRoute
 import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
+import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,6 +84,14 @@ fun Hugbunadarver2App() {
         return
     }
 
+    val isAdmin = extractRoleFromToken(token!!) == "ADMIN"
+
+    LaunchedEffect(isAdmin, currentDestination) {
+        if (!isAdmin && currentDestination == AppDestinations.ADMIN) {
+            currentDestination = AppDestinations.HOME
+        }
+    }
+
     if (showEditProfile) {
         EditProfileRoute(
             token = token!!,
@@ -100,9 +112,24 @@ fun Hugbunadarver2App() {
         return
     }
 
+    val visibleDestinations = if (isAdmin) {
+        listOf(
+            AppDestinations.HOME,
+            AppDestinations.FAVORITES,
+            AppDestinations.PROFILE,
+            AppDestinations.ADMIN
+        )
+    } else {
+        listOf(
+            AppDestinations.HOME,
+            AppDestinations.FAVORITES,
+            AppDestinations.PROFILE
+        )
+    }
+
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            AppDestinations.entries.forEach {
+            visibleDestinations.forEach {
                 item(
                     icon = { Icon(it.icon, contentDescription = it.label) },
                     label = { Text(it.label) },
@@ -136,7 +163,40 @@ fun Hugbunadarver2App() {
                     authUiResetKey++
                 }
             )
+            AppDestinations.ADMIN -> {
+                if (isAdmin) {
+                    AdminRoute()
+                } else {
+                    HomeScreen(
+                        state = homeVm.state,
+                        onRetry = homeVm::loadMovies,
+                        onToggleFavorite = homeVm::toggleFavorite,
+                        onFilterGenre = homeVm::loadMoviesByGenre
+                    )
+                }
+            }
         }
+    }
+}
+
+private fun extractRoleFromToken(token: String): String {
+    return try {
+        val parts = token.split(".")
+        if (parts.size < 2) return "USER"
+
+        val payload = parts[1]
+        val decoded = Base64.decode(
+            payload,
+            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+        )
+        val json = JSONObject(String(decoded))
+
+        when (json.optString("role", "USER").uppercase()) {
+            "ADMIN" -> "ADMIN"
+            else -> "USER"
+        }
+    } catch (_: Exception) {
+        "USER"
     }
 }
 
@@ -147,4 +207,5 @@ enum class AppDestinations(
     HOME("Home", Icons.Default.Home),
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
+    ADMIN("Admin", Icons.Default.AccountBox),
 }

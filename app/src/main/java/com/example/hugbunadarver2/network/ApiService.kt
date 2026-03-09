@@ -21,15 +21,35 @@ data class AuthResponse(val token: String)
 
 data class UpdateUsernameRequest(val username: String)
 data class UpdateUsernameResponse(val username: String)
+data class AddMovieRequest(
+    val title: String,
+    val genre: String,
+    val ageRating: Int,
+    val duration: Int
+)
+
+data class UpdateMovieRequest(
+    val title: String,
+    val genre: String,
+    val ageRating: Int,
+    val duration: Int,
+    val nowShowing: Boolean
+)
 
 interface ApiService {
 
+    /**
+     * User authentication
+     */
     @POST("auth/login")
     suspend fun login(@Body req: LoginRequest): Response<LoginResponse>
 
     @POST("auth/signup")
     suspend fun signUp(@Body req: SignUpRequest): Response<AuthResponse>
 
+    /**
+     * Profile
+     */
     @GET("profile/profile")
     suspend fun getUserProfile(): Response<ProfileResponse>
 
@@ -43,7 +63,9 @@ interface ApiService {
     @DELETE("profile/delete")
     suspend fun deleteAccount(): Response<Unit>
 
-    // Movies
+    /**
+     * Movies
+     */
     @GET("movies")
     suspend fun getMovies(): Response<List<Movie>>
 
@@ -53,6 +75,9 @@ interface ApiService {
     @GET("favorites")
     suspend fun getFavorites(): Response<List<Movie>>
 
+    /**
+     * Favorites
+     */
     @POST("favorites/{movieId}")
     suspend fun addFavorite(@Path("movieId") movieId: Long): Response<Unit>
 
@@ -63,4 +88,13 @@ interface ApiService {
     suspend fun getMoviesByGenre(
         @Path("genre") genre: String
     ): Response<List<Movie>>
+
+    /**
+     * Admin
+     */
+    @POST("movies")
+    suspend fun addMovie(@Body movie: AddMovieRequest): Response<Movie>
+
+    @PATCH("movies/{movieId}")
+    suspend fun updateMovie(@Path("movieId") movieId: Long, @Body movie: UpdateMovieRequest): Response<Movie>
 }
