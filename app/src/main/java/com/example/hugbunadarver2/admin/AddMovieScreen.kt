@@ -1,4 +1,5 @@
 package com.example.hugbunadarver2.admin
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,13 +11,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddMovieScreen(
     state: AdminState,
@@ -27,6 +39,9 @@ fun AddMovieScreen(
     onSubmit: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val genres = listOf("Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Sci-Fi", "Thriller")
+    var genreExpanded by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,14 +59,39 @@ fun AddMovieScreen(
             enabled = !state.loading
         )
         Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
-            value = state.genre,
-            onValueChange = onGenreChange,
-            label = { Text("Genre") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            enabled = !state.loading
-        )
+        ExposedDropdownMenuBox(
+            expanded = genreExpanded,
+            onExpandedChange = { genreExpanded = !genreExpanded }
+        ) {
+            OutlinedTextField(
+                value = state.genre,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Genre") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = genreExpanded)
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                enabled = !state.loading
+            )
+
+            DropdownMenu(
+                expanded = genreExpanded,
+                onDismissRequest = { genreExpanded = false }
+            ) {
+                genres.forEach { genre ->
+                    DropdownMenuItem(
+                        text = { Text(genre) },
+                        onClick = {
+                            onGenreChange(genre)
+                            genreExpanded = false
+                        }
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = state.ageRating,
