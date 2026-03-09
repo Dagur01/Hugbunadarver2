@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hugbunadarver2.network.AddMovieRequest
 import com.example.hugbunadarver2.network.ApiClient
+import com.example.hugbunadarver2.network.UpdateMovieRequest
+import com.example.hugbunadarver2.home.Movie
 import kotlinx.coroutines.launch
 
 data class AdminState(
@@ -19,8 +21,31 @@ data class AdminState(
     val successMessage: String? = null
 )
 
+data class EditMovieState(
+    val movieId: Long = 0,
+    val title: String = "",
+    val genre: String = "",
+    val ageRating: String = "",
+    val duration: String = "",
+    val nowShowing: Boolean = false,
+    val loading: Boolean = false,
+    val error: String? = null
+)
+
+data class MovieListState(
+    val movies: List<Movie> = emptyList(),
+    val loading: Boolean = false,
+    val error: String? = null
+)
+
 class AdminViewModel : ViewModel() {
     var state by mutableStateOf(AdminState())
+        private set
+
+    var editMovieState by mutableStateOf(EditMovieState())
+        private set
+
+    var movieListState by mutableStateOf(MovieListState())
         private set
 
     fun onTitleChange(value: String) {
@@ -94,5 +119,107 @@ class AdminViewModel : ViewModel() {
             }
         }
     }
-}
 
+    fun loadMoviesForSelection() {
+        viewModelScope.launch {
+            movieListState = movieListState.copy(loading = true, error = null)
+            try {
+                val response = ApiClient.api.getMovies()
+                if (response.isSuccessful && response.body() != null) {
+                    movieListState = movieListState.copy(
+                        movies = response.body()!!,
+                        loading = false
+                    )
+                } else {
+                    movieListState = movieListState.copy(
+                        loading = false,
+                        error = "Failed to load movies"
+                    )
+                }
+            } catch (e: Exception) {
+                movieListState = movieListState.copy(
+                    loading = false,
+                    error = "Network error: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun selectMovieForEdit(movie: Movie) {
+        editMovieState = EditMovieState(
+            movieId = movie.movieId,
+            title = movie.title,
+            genre = movie.genre ?: "",
+            ageRating = movie.ageRating?.toString() ?: "",
+            duration = movie.duration?.toString() ?: "",
+            nowShowing = movie.nowShowing ?: false
+        )
+    }
+
+    fun onEditTitleChange(value: String) {
+        editMovieState = editMovieState.copy(title = value)
+    }
+
+    fun onEditGenreChange(value: String) {
+        editMovieState = editMovieState.copy(genre = value)
+    }
+
+    fun onEditAgeRatingChange(value: String) {
+        editMovieState = editMovieState.copy(ageRating = value)
+    }
+
+    fun onEditDurationChange(value: String) {
+        editMovieState = editMovieState.copy(duration = value)
+    }
+
+    fun onEditNowShowingChange(value: Boolean) {
+        editMovieState = editMovieState.copy(nowShowing = value)
+    }
+
+    fun submitMovieEdit(onSuccess: () -> Unit) {
+        val title = editMovieState.title.trim()
+        val genre = editMovieState.genre.trim()
+        val ageRating = editMovieState.ageRating.toIntOrNull()
+        val duration = editMovieState.duration.toIntOrNull()
+
+        if (title.isBlank() || genre.isBlank() || ageRating == null || duration == null) {
+            editMovieState = editMovieState.copy(error = "Please fill all fields correctly")
+            return
+        }
+
+        viewModelScope.launch {
+            editMovieState = editMovieState.copy(loading = true, error = null)
+            try {
+                val response = ApiClient.api.updateMovie(
+                    editMovieState.movieId,
+                    UpdateMovieRequest(
+                        title = title,
+                        genre = genre,
+                        ageRating = ageRating,
+                        duration = duration,
+                        nowShowing = editMovieState.nowShowing
+                    )
+                )
+
+                if (response.isSuccessful) {
+                    editMovieState = EditMovieState()
+                    state = state.copy(successMessage = "Movie updated successfully")
+                    onSuccess()
+                } else {
+                    val msg = response.errorBody()?.string()?.ifBlank { null }
+                        ?: "Failed to update movie (${response.code()})"
+                    editMovieState = editMovieState.copy(loading = false, error = msg)
+                }
+            } catch (e: Exception) {
+                editMovieState = editMovieState.copy(
+                    loading = false,
+                    error = "Network error: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun clearEditError() {
+        editMovieState = editMovieState.copy(error = null)
+    }
+}

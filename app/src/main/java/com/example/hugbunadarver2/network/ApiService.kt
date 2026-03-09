@@ -28,6 +28,14 @@ data class AddMovieRequest(
     val duration: Int
 )
 
+data class UpdateMovieRequest(
+    val title: String,
+    val genre: String,
+    val ageRating: Int,
+    val duration: Int,
+    val nowShowing: Boolean
+)
+
 interface ApiService {
 
     /**
@@ -86,4 +94,7 @@ interface ApiService {
      */
     @POST("movies")
     suspend fun addMovie(@Body movie: AddMovieRequest): Response<Movie>
+
+    @PATCH("movies/{movieId}")
+    suspend fun updateMovie(@Path("movieId") movieId: Long, @Body movie: UpdateMovieRequest): Response<Movie>
 }
