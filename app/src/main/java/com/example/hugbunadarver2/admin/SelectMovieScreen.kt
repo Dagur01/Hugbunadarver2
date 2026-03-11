@@ -1,6 +1,4 @@
 package com.example.hugbunadarver2.admin
-import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.hugbunadarver2.home.decodeMoviePoster
 import com.example.hugbunadarver2.home.Movie
 @Composable
 fun SelectMovieScreen(
@@ -104,14 +103,7 @@ fun MovieSelectionCard(
     ) {
         Column {
             Box {
-                val bitmap = movie.posterBase64?.let { base64 ->
-                    try {
-                        val bytes = Base64.decode(base64, Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
+                val bitmap = decodeMoviePoster(movie.posterBase64)
                 if (bitmap != null) {
                     Image(
                         bitmap = bitmap.asImageBitmap(),
