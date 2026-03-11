@@ -1,5 +1,7 @@
 package com.example.hugbunadarver2.home
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -142,7 +144,12 @@ fun MovieCard(
 
             Box {
                 // Poster image
-                val bitmap = decodeMoviePoster(movie.posterBase64)
+                val bitmap = movie.posterBase64?.let { base64 ->
+                    try {
+                        val bytes = Base64.decode(base64, Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    } catch (e: Exception) { null }
+                }
 
                 if (bitmap != null) {
                     Image(
