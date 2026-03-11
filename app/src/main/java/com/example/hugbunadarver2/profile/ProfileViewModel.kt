@@ -36,18 +36,12 @@ class ProfileViewModel : ViewModel() {
 
                 if (response.isSuccessful && response.body() != null) {
                     val profile = response.body()!!
-                    val normalizedPicture = profile.profilePictureBase64?.let { base64OrDataUri ->
-                        if (base64OrDataUri.startsWith("data:image")) {
-                            base64OrDataUri
-                        } else {
-                            "data:image/jpeg;base64,$base64OrDataUri"
-                        }
-                    }
+                    val normalizedPicture = profile.profilePictureDataUri
 
                     state = state.copy(
                         username = profile.username?.ifEmpty { "" } ?: "",
                         email = profile.email?.ifEmpty { "" } ?: "",
-                        profilePictureUrl = normalizedPicture ?: state.profilePictureUrl,
+                        profilePictureUrl = normalizedPicture,
                         loading = false
                     )
                 } else {
