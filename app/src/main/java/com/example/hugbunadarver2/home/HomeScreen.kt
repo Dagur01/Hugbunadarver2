@@ -26,13 +26,16 @@ import androidx.compose.runtime.*
 
 
 @Composable
-fun HomeRoute() {
+fun HomeRoute(
+    onBookMovie: (Movie) -> Unit
+) {
     val vm: HomeViewModel = viewModel()
     HomeScreen(
         state = vm.state,
         onRetry = vm::loadMovies,
         onToggleFavorite = vm::toggleFavorite,
-        onFilterGenre = vm::loadMoviesByGenre
+        onFilterGenre = vm::loadMoviesByGenre,
+        onBookMovie = onBookMovie
     )
 }
 
@@ -41,7 +44,8 @@ fun HomeScreen(
     state: HomeState,
     onRetry: () -> Unit,
     onToggleFavorite: (Long) -> Unit,
-    onFilterGenre: (String) -> Unit
+    onFilterGenre: (String) -> Unit,
+    onBookMovie: (Movie) -> Unit
 ) {
     val genres = listOf("Action", "Drama", "Comedy", "Sci-Fi", "Horror")
     var selectedGenre by remember { mutableStateOf<String?>(null) }
@@ -119,7 +123,8 @@ fun HomeScreen(
                             MovieCard(
                                 movie = movie,
                                 isFavorite = state.favoriteIds.contains(movie.movieId),
-                                onToggleFavorite = { onToggleFavorite(movie.movieId) }
+                                onToggleFavorite = { onToggleFavorite(movie.movieId) },
+                                onBookMovie = {onBookMovie(movie)}
                             )
                         }
                     }
@@ -133,7 +138,8 @@ fun HomeScreen(
 fun MovieCard(
     movie: Movie,
     isFavorite: Boolean,
-    onToggleFavorite: () -> Unit
+    onToggleFavorite: () -> Unit,
+    onBookMovie: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -220,6 +226,14 @@ fun MovieCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = onBookMovie,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Book")
                 }
             }
         }

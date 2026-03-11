@@ -9,6 +9,9 @@ import com.example.hugbunadarver2.network.AddMovieRequest
 import com.example.hugbunadarver2.network.ApiClient
 import com.example.hugbunadarver2.network.UpdateMovieRequest
 import com.example.hugbunadarver2.home.Movie
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 data class AdminState(
@@ -126,8 +129,9 @@ class AdminViewModel : ViewModel() {
             try {
                 val response = ApiClient.api.getMovies()
                 if (response.isSuccessful && response.body() != null) {
+                    val moviesWithPosters = hydrateMoviesWithDetails(response.body()!!)
                     movieListState = movieListState.copy(
-                        movies = response.body()!!,
+                        movies = moviesWithPosters,
                         loading = false
                     )
                 } else {
@@ -221,5 +225,26 @@ class AdminViewModel : ViewModel() {
 
     fun clearEditError() {
         editMovieState = editMovieState.copy(error = null)
+    }
+
+    private suspend fun hydrateMoviesWithDetails(movies: List<Movie>): List<Movie> = coroutineScope {
+        movies.map { movie ->
+            async {
+                if (!movie.posterBase64.isNullOrBlank()) {
+                    movie
+                } else {
+                    try {
+                        val detailResponse = ApiClient.api.getMovieById(movie.movieId.toInt())
+                        if (detailResponse.isSuccessful && detailResponse.body() != null) {
+                            detailResponse.body()!!
+                        } else {
+                            movie
+                        }
+                    } catch (_: Exception) {
+                        movie
+                    }
+                }
+            }
+        }.awaitAll()
     }
 }

@@ -6,6 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hugbunadarver2.network.ApiClient
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 data class HomeState(
@@ -29,7 +32,8 @@ class HomeViewModel : ViewModel() {
             try {
                 val response = ApiClient.api.getMovies()
                 if (response.isSuccessful && response.body() != null) {
-                    state = state.copy(movies = response.body()!!, loading = false)
+                    val moviesWithPosters = hydrateMoviesWithDetails(response.body()!!)
+                    state = state.copy(movies = moviesWithPosters, loading = false)
                 } else {
                     state = state.copy(
                         loading = false,
@@ -90,8 +94,9 @@ class HomeViewModel : ViewModel() {
                 val response = ApiClient.api.getMoviesByGenre(genre)
 
                 if (response.isSuccessful && response.body() != null) {
+                    val moviesWithPosters = hydrateMoviesWithDetails(response.body()!!)
                     state = state.copy(
-                        movies = response.body()!!,
+                        movies = moviesWithPosters,
                         loading = false
                     )
                 } else {
@@ -108,5 +113,26 @@ class HomeViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private suspend fun hydrateMoviesWithDetails(movies: List<Movie>): List<Movie> = coroutineScope {
+        movies.map { movie ->
+            async {
+                if (!movie.posterBase64.isNullOrBlank()) {
+                    movie
+                } else {
+                    try {
+                        val detailResponse = ApiClient.api.getMovieById(movie.movieId.toInt())
+                        if (detailResponse.isSuccessful && detailResponse.body() != null) {
+                            detailResponse.body()!!
+                        } else {
+                            movie
+                        }
+                    } catch (_: Exception) {
+                        movie
+                    }
+                }
+            }
+        }.awaitAll()
     }
 }
