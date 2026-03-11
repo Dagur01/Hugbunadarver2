@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hugbunadarver2.admin.AdminRoute
 import com.example.hugbunadarver2.auth.LoginRoute
 import com.example.hugbunadarver2.auth.SignUpRoute
+import com.example.hugbunadarver2.booking.BookingRoute
 import com.example.hugbunadarver2.home.HomeScreen
 import com.example.hugbunadarver2.home.HomeViewModel
 import com.example.hugbunadarver2.network.ApiClient
@@ -32,6 +34,12 @@ import com.example.hugbunadarver2.profile.EditProfileRoute
 import com.example.hugbunadarver2.profile.ProfileRoute
 import com.example.hugbunadarver2.ui.theme.Hugbunadarver2Theme
 import org.json.JSONObject
+import com.example.hugbunadarver2.booking.BookingRoute
+import com.example.hugbunadarver2.home.Movie
+import androidx.compose.material.icons.filled.List
+import com.example.hugbunadarver2.mybookings.MyBookingsRoute
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +62,16 @@ fun Hugbunadarver2App() {
     var authUiResetKey by rememberSaveable { mutableStateOf(0) }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val homeVm: HomeViewModel = viewModel()
+    var selectedMovieForBooking by remember { mutableStateOf<com.example.hugbunadarver2.home.Movie?>(null) }
+
+
+    if (selectedMovieForBooking != null) {
+        BookingRoute(
+            movie = selectedMovieForBooking!!,
+            onBack = { selectedMovieForBooking = null }
+        )
+        return
+    }
 
     if (token == null) {
         if (showSignUp) {
@@ -117,12 +135,14 @@ fun Hugbunadarver2App() {
             AppDestinations.HOME,
             AppDestinations.FAVORITES,
             AppDestinations.PROFILE,
+            AppDestinations.MY_BOOKINGS,
             AppDestinations.ADMIN
         )
     } else {
         listOf(
             AppDestinations.HOME,
             AppDestinations.FAVORITES,
+            AppDestinations.MY_BOOKINGS,
             AppDestinations.PROFILE
         )
     }
@@ -144,7 +164,10 @@ fun Hugbunadarver2App() {
                 state = homeVm.state,
                 onRetry = homeVm::loadMovies,
                 onToggleFavorite = homeVm::toggleFavorite,
-                onFilterGenre = homeVm::loadMoviesByGenre
+                onFilterGenre = homeVm::loadMoviesByGenre,
+                onBookMovie = { movie ->
+                    selectedMovieForBooking = movie
+                }
             )
             AppDestinations.FAVORITES -> FavoritesScreen(
                 movies = homeVm.state.movies,
@@ -171,10 +194,14 @@ fun Hugbunadarver2App() {
                         state = homeVm.state,
                         onRetry = homeVm::loadMovies,
                         onToggleFavorite = homeVm::toggleFavorite,
-                        onFilterGenre = homeVm::loadMoviesByGenre
+                        onFilterGenre = homeVm::loadMoviesByGenre,
+                        onBookMovie = { movie ->
+                            selectedMovieForBooking = movie
+                        }
                     )
                 }
             }
+            AppDestinations.MY_BOOKINGS -> MyBookingsRoute()
         }
     }
 }
@@ -206,6 +233,7 @@ enum class AppDestinations(
 ) {
     HOME("Home", Icons.Default.Home),
     FAVORITES("Favorites", Icons.Default.Favorite),
+    MY_BOOKINGS("Bookings", Icons.Default.List),
     PROFILE("Profile", Icons.Default.AccountBox),
     ADMIN("Admin", Icons.Default.AccountBox),
 }

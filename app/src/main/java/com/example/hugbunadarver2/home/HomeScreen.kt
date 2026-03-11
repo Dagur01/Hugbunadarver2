@@ -9,7 +9,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,20 +22,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.runtime.*
-
 
 @Composable
-fun HomeRoute() {
+fun HomeRoute(
+    onBookMovie: (Movie) -> Unit
+) {
     val vm: HomeViewModel = viewModel()
     HomeScreen(
         state = vm.state,
         onRetry = vm::loadMovies,
         onToggleFavorite = vm::toggleFavorite,
-        onFilterGenre = vm::loadMoviesByGenre
+        onFilterGenre = vm::loadMoviesByGenre,
+        onBookMovie = onBookMovie
     )
 }
 
@@ -41,7 +42,8 @@ fun HomeScreen(
     state: HomeState,
     onRetry: () -> Unit,
     onToggleFavorite: (Long) -> Unit,
-    onFilterGenre: (String) -> Unit
+    onFilterGenre: (String) -> Unit,
+    onBookMovie: (Movie) -> Unit
 ) {
     val genres = listOf("Action", "Drama", "Comedy", "Sci-Fi", "Horror")
     var selectedGenre by remember { mutableStateOf<String?>(null) }
@@ -119,7 +121,8 @@ fun HomeScreen(
                             MovieCard(
                                 movie = movie,
                                 isFavorite = state.favoriteIds.contains(movie.movieId),
-                                onToggleFavorite = { onToggleFavorite(movie.movieId) }
+                                onToggleFavorite = { onToggleFavorite(movie.movieId) },
+                                onBookMovie = { onBookMovie(movie) }
                             )
                         }
                     }
@@ -133,7 +136,8 @@ fun HomeScreen(
 fun MovieCard(
     movie: Movie,
     isFavorite: Boolean,
-    onToggleFavorite: () -> Unit
+    onToggleFavorite: () -> Unit,
+    onBookMovie: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -141,14 +145,14 @@ fun MovieCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-
             Box {
-                // Poster image
                 val bitmap = movie.posterBase64?.let { base64 ->
                     try {
                         val bytes = Base64.decode(base64, Base64.DEFAULT)
                         BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    } catch (e: Exception) { null }
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
 
                 if (bitmap != null) {
@@ -172,7 +176,6 @@ fun MovieCard(
                     }
                 }
 
-
                 IconButton(
                     onClick = onToggleFavorite,
                     modifier = Modifier
@@ -194,7 +197,9 @@ fun MovieCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 Spacer(Modifier.height(4.dp))
+
                 movie.genre?.let {
                     Text(
                         text = it,
@@ -202,6 +207,7 @@ fun MovieCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
@@ -221,8 +227,16 @@ fun MovieCard(
                         )
                     }
                 }
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = onBookMovie,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Book")
+                }
             }
         }
     }
 }
-

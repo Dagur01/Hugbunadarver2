@@ -43,7 +43,8 @@ fun FavoritesScreen(
             MovieCard(
                 movie = movie,
                 isFavorite = true,
-                onToggleFavorite = { onToggleFavorite(movie.movieId) }
+                onToggleFavorite = { onToggleFavorite(movie.movieId) },
+                onBookMovie = { }
             )
         }
     }

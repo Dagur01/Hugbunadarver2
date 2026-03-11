@@ -36,6 +36,44 @@ data class UpdateMovieRequest(
     val nowShowing: Boolean
 )
 
+data class ScreeningDto(
+    val id: Long,
+    val screeningTime: String
+)
+
+data class MovieHallDto(
+    val movieHallId: Long,
+    val name: String,
+    val location: String,
+    val nowShowing: Boolean
+)
+
+data class SeatDto(
+    val seatId: Long,
+    val rowNumber: Int,
+    val seatNumber: Int,
+    val price: Int?,
+    val booked: Boolean
+)
+
+data class CreateBookingRequest(
+    val movieId: Long,
+    val hallId: Long,
+    val seatId: Long,
+    val screeningId: Long,
+    val discountCode: String? = null
+)
+
+data class BookingDto(
+    val bookingid: Long,
+    val movie: Movie,
+    val movieHall: MovieHallDto,
+    val seat: SeatDto,
+    val screening: ScreeningDto,
+    val discountCode: String?,
+    val discountPercent: Int?
+)
+
 interface ApiService {
 
     /**
@@ -97,4 +135,33 @@ interface ApiService {
 
     @PATCH("movies/{movieId}")
     suspend fun updateMovie(@Path("movieId") movieId: Long, @Body movie: UpdateMovieRequest): Response<Movie>
+
+    /**
+     * Booking
+     */
+
+    @GET("screenings")
+    suspend fun getScreenings(): Response<List<ScreeningDto>>
+
+    @GET("movieHalls")
+    suspend fun getMovieHalls(): Response<List<MovieHallDto>>
+
+    @GET("seats/hall/{hallId}")
+    suspend fun getSeatsByHall(@Path("hallId") hallId: Long): Response<List<SeatDto>>
+
+    @POST("bookings")
+    suspend fun createBooking(@Body req: CreateBookingRequest): Response<ResponseBody>
+
+    @DELETE("bookings/{bookingId}")
+    suspend fun cancelBooking(@Path("bookingId") bookingId: Long): Response<ResponseBody>
+
+    @GET("bookings/screening/{screeningId}/booked-seats")
+    suspend fun getBookedSeatsForScreening(
+        @Path("screeningId") screeningId: Long
+    ): Response<List<Long>>
+
+    @GET("bookings")
+    suspend fun getMyBookings(): Response<List<BookingDto>>
+
+
 }
