@@ -14,9 +14,7 @@ import android.util.Base64
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-
-
-
+import org.json.JSONObject
 
 class ProfileViewModel : ViewModel() {
 
@@ -25,7 +23,11 @@ class ProfileViewModel : ViewModel() {
 
     fun loadUserProfile(token: String) {
         viewModelScope.launch {
-            state = state.copy(loading = true, error = null)
+            state = state.copy(
+                loading = true,
+                error = null,
+                userRole = extractRoleFromToken(token)
+            )
 
             try {
                 ApiClient.setToken(token)
@@ -34,13 +36,12 @@ class ProfileViewModel : ViewModel() {
 
                 if (response.isSuccessful && response.body() != null) {
                     val profile = response.body()!!
+                    val normalizedPicture = profile.profilePictureDataUri
 
                     state = state.copy(
                         username = profile.username?.ifEmpty { "" } ?: "",
                         email = profile.email?.ifEmpty { "" } ?: "",
-                        profilePictureUrl = profile.profilePictureBase64?.let {
-                            if (it.isNotEmpty()) "data:image/jpeg;base64,$it" else null
-                        } ?: state.profilePictureUrl,
+                        profilePictureUrl = normalizedPicture,
                         loading = false
                     )
                 } else {
@@ -57,6 +58,27 @@ class ProfileViewModel : ViewModel() {
                     error = "Network error: ${e.message}"
                 )
             }
+        }
+    }
+
+    private fun extractRoleFromToken(token: String): String {
+        return try {
+            val parts = token.split(".")
+            if (parts.size < 2) return "USER"
+
+            val payload = parts[1]
+            val decoded = Base64.decode(
+                payload,
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+            )
+            val json = JSONObject(String(decoded))
+
+            when (json.optString("role", "USER").uppercase()) {
+                "ADMIN" -> "ADMIN"
+                else -> "USER"
+            }
+        } catch (_: Exception) {
+            "USER"
         }
     }
 

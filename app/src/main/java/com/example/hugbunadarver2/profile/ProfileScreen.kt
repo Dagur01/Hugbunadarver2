@@ -40,7 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
     ) {
         val vm: ProfileViewModel = viewModel()
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(token) {
             vm.loadUserProfile(token)
         }
 
@@ -77,15 +77,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
             if (state.profilePictureUrl != null) {
                 val decodedImageBitmap = remember(state.profilePictureUrl) {
                     state.profilePictureUrl?.let { url ->
-                        if (url.startsWith("data:image")) {
-                            val base64String = url.substringAfter("base64,")
-                            try {
-                                val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-                                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                            } catch (e: Exception) {
-                                null
-                            }
-                        } else null
+                        val base64String = url
+                            .substringAfter("base64,", url)
+                            .replace("\n", "")
+                            .replace("\r", "")
+                            .trim()
+
+                        try {
+                            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+                            BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
                 }
 
@@ -131,6 +134,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
             Text(
                 text = state.email,
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = "Role: ${state.userRole}",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 

@@ -21,15 +21,73 @@ data class AuthResponse(val token: String)
 
 data class UpdateUsernameRequest(val username: String)
 data class UpdateUsernameResponse(val username: String)
+data class AddMovieRequest(
+    val title: String,
+    val genre: String,
+    val ageRating: Int,
+    val duration: Int
+)
+
+data class UpdateMovieRequest(
+    val title: String,
+    val genre: String,
+    val ageRating: Int,
+    val duration: Int,
+    val nowShowing: Boolean
+)
+
+data class ScreeningDto(
+    val id: Long,
+    val screeningTime: String
+)
+
+data class MovieHallDto(
+    val movieHallId: Long,
+    val name: String,
+    val location: String,
+    val nowShowing: Boolean
+)
+
+data class SeatDto(
+    val seatId: Long,
+    val rowNumber: Int,
+    val seatNumber: Int,
+    val price: Int?,
+    val booked: Boolean
+)
+
+data class CreateBookingRequest(
+    val movieId: Long,
+    val hallId: Long,
+    val seatId: Long,
+    val screeningId: Long,
+    val discountCode: String? = null
+)
+
+data class BookingDto(
+    val bookingid: Long,
+    val movie: Movie,
+    val movieHall: MovieHallDto,
+    val seat: SeatDto,
+    val screening: ScreeningDto,
+    val discountCode: String?,
+    val discountPercent: Int?
+)
 
 interface ApiService {
 
+    /**
+     * User authentication
+     */
     @POST("auth/login")
     suspend fun login(@Body req: LoginRequest): Response<LoginResponse>
 
     @POST("auth/signup")
     suspend fun signUp(@Body req: SignUpRequest): Response<AuthResponse>
 
+    /**
+     * Profile
+     */
     @GET("profile/profile")
     suspend fun getUserProfile(): Response<ProfileResponse>
 
@@ -43,7 +101,9 @@ interface ApiService {
     @DELETE("profile/delete")
     suspend fun deleteAccount(): Response<Unit>
 
-    // Movies
+    /**
+     * Movies
+     */
     @GET("movies")
     suspend fun getMovies(): Response<List<Movie>>
 
@@ -53,6 +113,9 @@ interface ApiService {
     @GET("favorites")
     suspend fun getFavorites(): Response<List<Movie>>
 
+    /**
+     * Favorites
+     */
     @POST("favorites/{movieId}")
     suspend fun addFavorite(@Path("movieId") movieId: Long): Response<Unit>
 
@@ -63,4 +126,42 @@ interface ApiService {
     suspend fun getMoviesByGenre(
         @Path("genre") genre: String
     ): Response<List<Movie>>
+
+    /**
+     * Admin
+     */
+    @POST("movies")
+    suspend fun addMovie(@Body movie: AddMovieRequest): Response<Movie>
+
+    @PATCH("movies/{movieId}")
+    suspend fun updateMovie(@Path("movieId") movieId: Long, @Body movie: UpdateMovieRequest): Response<Movie>
+
+    /**
+     * Booking
+     */
+
+    @GET("screenings")
+    suspend fun getScreenings(): Response<List<ScreeningDto>>
+
+    @GET("movieHalls")
+    suspend fun getMovieHalls(): Response<List<MovieHallDto>>
+
+    @GET("seats/hall/{hallId}")
+    suspend fun getSeatsByHall(@Path("hallId") hallId: Long): Response<List<SeatDto>>
+
+    @POST("bookings")
+    suspend fun createBooking(@Body req: CreateBookingRequest): Response<ResponseBody>
+
+    @DELETE("bookings/{bookingId}")
+    suspend fun cancelBooking(@Path("bookingId") bookingId: Long): Response<ResponseBody>
+
+    @GET("bookings/screening/{screeningId}/booked-seats")
+    suspend fun getBookedSeatsForScreening(
+        @Path("screeningId") screeningId: Long
+    ): Response<List<Long>>
+
+    @GET("bookings")
+    suspend fun getMyBookings(): Response<List<BookingDto>>
+
+
 }

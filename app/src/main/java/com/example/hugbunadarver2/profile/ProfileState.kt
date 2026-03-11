@@ -4,8 +4,7 @@ data class ProfileState(
     val username: String = "",
     val email: String = "",
     val profilePictureUrl: String? = null,
+    val userRole: String = "USER",
     val loading: Boolean = false,
     val error: String? = null
-
 )
-
