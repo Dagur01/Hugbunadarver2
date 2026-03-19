@@ -57,14 +57,23 @@ Við höfum mætt áskorunum í þróunarferlinu eins og til dæmis notaði bake
 Við höfum góða yfirsýn yfir stöðu verkefnisins og vitum nákvæmlega hvaða verkþættir eru kláraðir og hvaða vinna er eftir. Grunnuppbygging kerfisins er stöðug og meginvirkni komin í gang.
 
 Authentication virkar
+
 Movie List virkar
+
 Favorites virkar
+
 Profile virkar
+
 Filtering virkar
+
 Admin update virkar
+
 Add movie virkar
 
 Næst á dagskrá:
+
 Invite Friends
+
 Friend requests
+
 Poster upload
