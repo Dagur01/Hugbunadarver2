@@ -12,9 +12,25 @@ Myndir eru birtar í grid-uppsetningu í appinu.
 
 Notendur geta bætt kvikmyndum í „Favorites“ og fjarlægt þær aftur.
 
+Notendur geta séð lista af favorites
+
 Profile gerir kleift að skoða og uppfæra notendanafn og mynd.
 
-Grunnvirkni kerfisins er því komin í gang og samskipti milli framenda og bakenda virka vel.
+Hægt er að sía kvikmyndir eftir genre.
+
+Notendur geta gert bókun.
+
+Notendur geta eytt aðgangi.
+
+Notendur geta notað afsláttarkóða við bókun.
+
+Notendur geta hætt við bókun.
+
+
+Administrator getur uppfært movie details og screening info.
+
+Administrator getur bætt við nýjum kvikmyndum með lýsingu og sýningartímum.
+
 
 ## Samvinna og verkaskipting 
 
@@ -28,6 +44,10 @@ Villuleit og keyrsluvandamál.
 
 Forgangsröðun næstu verkefna.
 
+Skipulag user stories.
+
+Við notum user stories til að halda utan um stöðu verkefnisins og hvaða virkni er tilbúin.
+
 ## Helstu áskoranir
 
 Við höfum mætt áskorunum í þróunarferlinu eins og til dæmis notaði bakendinn movieId á meðan framendinn notaði id. Þetta olli röngum hegðunum í UI (t.d. allar myndir merktust sem „favorite“).
@@ -35,3 +55,16 @@ Við höfum mætt áskorunum í þróunarferlinu eins og til dæmis notaði bake
 ## Mat á stöðu teymisins og vinna framundan
 
 Við höfum góða yfirsýn yfir stöðu verkefnisins og vitum nákvæmlega hvaða verkþættir eru kláraðir og hvaða vinna er eftir. Grunnuppbygging kerfisins er stöðug og meginvirkni komin í gang.
+
+Authentication virkar
+Movie List virkar
+Favorites virkar
+Profile virkar
+Filtering virkar
+Admin update virkar
+Add movie virkar
+
+Næst á dagskrá:
+Invite Friends
+Friend requests
+Poster upload
