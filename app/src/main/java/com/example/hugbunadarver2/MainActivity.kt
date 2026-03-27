@@ -38,6 +38,9 @@ import com.example.hugbunadarver2.booking.BookingRoute
 import com.example.hugbunadarver2.home.Movie
 import androidx.compose.material.icons.filled.List
 import com.example.hugbunadarver2.mybookings.MyBookingsRoute
+import com.example.hugbunadarver2.friends.FriendProfileRoute
+import com.example.hugbunadarver2.friends.FriendRequestsRoute
+import com.example.hugbunadarver2.friends.FriendsRoute
 
 
 
@@ -63,6 +66,8 @@ fun Hugbunadarver2App() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val homeVm: HomeViewModel = viewModel()
     var selectedMovieForBooking by remember { mutableStateOf<com.example.hugbunadarver2.home.Movie?>(null) }
+    var showFriendRequests by rememberSaveable { mutableStateOf(false) }
+    var selectedFriendEmail by rememberSaveable { mutableStateOf<String?>(null) }
 
 
     if (selectedMovieForBooking != null) {
@@ -136,6 +141,7 @@ fun Hugbunadarver2App() {
             AppDestinations.FAVORITES,
             AppDestinations.PROFILE,
             AppDestinations.MY_BOOKINGS,
+            AppDestinations.FRIENDS,
             AppDestinations.ADMIN
         )
     } else {
@@ -143,8 +149,24 @@ fun Hugbunadarver2App() {
             AppDestinations.HOME,
             AppDestinations.FAVORITES,
             AppDestinations.MY_BOOKINGS,
+            AppDestinations.FRIENDS,
             AppDestinations.PROFILE
         )
+    }
+
+    if (showFriendRequests) {
+        FriendRequestsRoute(
+            onBack = { showFriendRequests = false }
+        )
+        return
+    }
+
+    if (selectedFriendEmail != null) {
+        FriendProfileRoute(
+            email = selectedFriendEmail!!,
+            onBack = { selectedFriendEmail = null }
+        )
+        return
     }
 
     NavigationSuiteScaffold(
@@ -185,6 +207,11 @@ fun Hugbunadarver2App() {
                     currentDestination = AppDestinations.HOME
                     authUiResetKey++
                 }
+            )
+
+            AppDestinations.FRIENDS -> FriendsRoute(
+                onOpenRequests = { showFriendRequests = true },
+                onOpenProfile = { email -> selectedFriendEmail = email }
             )
             AppDestinations.ADMIN -> {
                 if (isAdmin) {
@@ -235,5 +262,6 @@ enum class AppDestinations(
     FAVORITES("Favorites", Icons.Default.Favorite),
     MY_BOOKINGS("Bookings", Icons.Default.List),
     PROFILE("Profile", Icons.Default.AccountBox),
+    FRIENDS("Friends", Icons.Default.AccountBox),
     ADMIN("Admin", Icons.Default.AccountBox),
 }

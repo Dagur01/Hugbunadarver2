@@ -74,6 +74,47 @@ data class BookingDto(
     val discountPercent: Int?
 )
 
+data class SendFriendRequestRequest(
+    val email: String
+)
+
+data class SimpleUserDto(
+    val userId: Long,
+    val email: String,
+    val username: String?
+)
+
+data class FriendRequestDto(
+    val id: Long,
+    val status: String,
+    val createdAt: String,
+    val fromUser: SimpleUserDto,
+    val toUser: SimpleUserDto
+)
+
+data class FriendProfileDto(
+    val email: String,
+    val username: String?,
+    val isFriend: Boolean,
+    val friends: List<String>,
+    val profilePictureBase64: String?
+)
+
+data class MovieInviteRequest(
+    val email: String,
+    val movieId: Long
+)
+
+data class MovieInvitationDto(
+    val id: Long,
+    val movieId: Long,
+    val status: String,
+    val createdAt: String,
+    val inviter: SimpleUserDto,
+    val invitee: SimpleUserDto
+)
+
+
 interface ApiService {
 
     /**
@@ -136,6 +177,13 @@ interface ApiService {
     @PATCH("movies/{movieId}")
     suspend fun updateMovie(@Path("movieId") movieId: Long, @Body movie: UpdateMovieRequest): Response<Movie>
 
+    @Multipart
+    @PATCH("movies/{movieId}/picture")
+    suspend fun uploadMoviePoster(
+        @Path("movieId") movieId: Long,
+        @Part file: MultipartBody.Part
+    ): ResponseBody
+
     /**
      * Booking
      */
@@ -162,6 +210,44 @@ interface ApiService {
 
     @GET("bookings")
     suspend fun getMyBookings(): Response<List<BookingDto>>
+
+
+    @POST("friends/request")
+    suspend fun sendFriendRequest(
+        @Body req: SendFriendRequestRequest
+    ): Response<FriendRequestDto>
+
+    @GET("friends/requests")
+    suspend fun getPendingFriendRequests(): Response<List<FriendRequestDto>>
+
+    @POST("friends/request/{id}/accept")
+    suspend fun acceptFriendRequest(@Path("id") id: Long): Response<FriendRequestDto>
+
+    @POST("friends/request/{id}/reject")
+    suspend fun rejectFriendRequest(@Path("id") id: Long): Response<FriendRequestDto>
+
+    @GET("friends/list")
+    suspend fun getFriendsList(): Response<List<String>>
+
+    @GET("users/{email}/profile")
+    suspend fun getFriendProfile(@Path("email") email: String): Response<FriendProfileDto>
+
+    @POST("friends/invite")
+    suspend fun inviteFriendToMovie(
+        @Body req: MovieInviteRequest
+    ): Response<MovieInvitationDto>
+
+    @GET("movies/invitations/sent")
+    suspend fun getSentMovieInvitations(): Response<List<MovieInvitationDto>>
+
+    @GET("movies/invitations/received")
+    suspend fun getReceivedMovieInvitations(): Response<List<MovieInvitationDto>>
+
+    @POST("movies/invitations/{id}/accept")
+    suspend fun acceptMovieInvitation(@Path("id") id: Long): Response<MovieInvitationDto>
+
+    @POST("movies/invitations/{id}/reject")
+    suspend fun rejectMovieInvitation(@Path("id") id: Long): Response<MovieInvitationDto>
 
 
 }

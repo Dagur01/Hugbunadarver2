@@ -1,5 +1,7 @@
 package com.example.hugbunadarver2.admin
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +15,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 data class AdminState(
     val title: String = "",
@@ -225,6 +230,48 @@ class AdminViewModel : ViewModel() {
 
     fun clearEditError() {
         editMovieState = editMovieState.copy(error = null)
+    }
+
+    fun uploadMoviePoster(
+        imageUri: Uri,
+        context: Context,
+        onSuccess: () -> Unit
+    ) {
+        if (editMovieState.movieId <= 0L) {
+            editMovieState = editMovieState.copy(error = "Select a movie before uploading a poster")
+            return
+        }
+
+        viewModelScope.launch {
+            editMovieState = editMovieState.copy(loading = true, error = null)
+            try {
+                val inputStream = context.contentResolver.openInputStream(imageUri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+
+                if (bytes == null) {
+                    editMovieState = editMovieState.copy(loading = false, error = "Failed to read image")
+                    return@launch
+                }
+
+                val mimeType = context.contentResolver.getType(imageUri) ?: "image/jpeg"
+                val fileName = if (mimeType.contains("png")) "poster.png" else "poster.jpg"
+
+                val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+                val filePart = MultipartBody.Part.createFormData("file", fileName, requestBody)
+
+                ApiClient.api.uploadMoviePoster(editMovieState.movieId, filePart)
+
+                editMovieState = editMovieState.copy(loading = false)
+                state = state.copy(successMessage = "Movie poster uploaded")
+                onSuccess()
+            } catch (e: Exception) {
+                editMovieState = editMovieState.copy(
+                    loading = false,
+                    error = "Failed to upload poster: ${e.message}"
+                )
+            }
+        }
     }
 
     private suspend fun hydrateMoviesWithDetails(movies: List<Movie>): List<Movie> = coroutineScope {
