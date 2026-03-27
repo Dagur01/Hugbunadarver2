@@ -41,6 +41,8 @@ import com.example.hugbunadarver2.mybookings.MyBookingsRoute
 import com.example.hugbunadarver2.friends.FriendProfileRoute
 import com.example.hugbunadarver2.friends.FriendRequestsRoute
 import com.example.hugbunadarver2.friends.FriendsRoute
+import com.example.hugbunadarver2.friends.MovieInvitationsRoute
+
 
 
 
@@ -68,12 +70,16 @@ fun Hugbunadarver2App() {
     var selectedMovieForBooking by remember { mutableStateOf<com.example.hugbunadarver2.home.Movie?>(null) }
     var showFriendRequests by rememberSaveable { mutableStateOf(false) }
     var selectedFriendEmail by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedMovieForInvitation by remember { mutableStateOf<Movie?>(null) }
 
 
     if (selectedMovieForBooking != null) {
         BookingRoute(
             movie = selectedMovieForBooking!!,
-            onBack = { selectedMovieForBooking = null }
+            onBack = { selectedMovieForBooking = null },
+            onInviteFriend = { movie ->
+                selectedMovieForInvitation = movie
+            }
         )
         return
     }
@@ -165,6 +171,14 @@ fun Hugbunadarver2App() {
         FriendProfileRoute(
             email = selectedFriendEmail!!,
             onBack = { selectedFriendEmail = null }
+        )
+        return
+    }
+
+    if (selectedMovieForInvitation != null) {
+        MovieInvitationsRoute(
+            movie = selectedMovieForInvitation!!,
+            onBack = { selectedMovieForInvitation = null }
         )
         return
     }
