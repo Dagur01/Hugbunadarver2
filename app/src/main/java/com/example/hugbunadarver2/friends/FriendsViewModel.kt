@@ -10,6 +10,8 @@ import com.example.hugbunadarver2.network.FriendProfileDto
 import com.example.hugbunadarver2.network.FriendRequestDto
 import com.example.hugbunadarver2.network.SendFriendRequestRequest
 import kotlinx.coroutines.launch
+import com.example.hugbunadarver2.network.MovieInvitationDto
+import com.example.hugbunadarver2.network.MovieInviteRequest
 
 data class FriendsState(
     val emailInput: String = "",
@@ -18,7 +20,10 @@ data class FriendsState(
     val selectedProfile: FriendProfileDto? = null,
     val loading: Boolean = false,
     val error: String? = null,
-    val successMessage: String? = null
+    val successMessage: String? = null,
+    val inviteEmailInput: String = "",
+    val sentMovieInvitations: List<com.example.hugbunadarver2.network.MovieInvitationDto> = emptyList(),
+    val receivedMovieInvitations: List<com.example.hugbunadarver2.network.MovieInvitationDto> = emptyList()
 )
 
 class FriendsViewModel : ViewModel() {
@@ -186,5 +191,118 @@ class FriendsViewModel : ViewModel() {
 
     fun clearMessage() {
         state = state.copy(error = null, successMessage = null)
+    }
+
+    fun onInviteEmailChange(value: String) {
+        state = state.copy(inviteEmailInput = value)
+    }
+
+    fun sendMovieInvitation(movieId: Long) {
+        val email = state.inviteEmailInput.trim()
+        if (email.isBlank()) {
+            state = state.copy(error = "Please enter a friend email")
+            return
+        }
+
+        viewModelScope.launch {
+            state = state.copy(loading = true, error = null, successMessage = null)
+            try {
+                val res = ApiClient.api.inviteFriendToMovie(
+                    MovieInviteRequest(
+                        email = email,
+                        movieId = movieId
+                    )
+                )
+
+                if (res.isSuccessful) {
+                    state = state.copy(
+                        loading = false,
+                        successMessage = "Movie invitation sent",
+                        inviteEmailInput = ""
+                    )
+                    loadSentMovieInvitations()
+                } else {
+                    state = state.copy(
+                        loading = false,
+                        error = res.errorBody()?.string() ?: "Failed to send movie invitation"
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(
+                    loading = false,
+                    error = "Network error: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun loadSentMovieInvitations() {
+        viewModelScope.launch {
+            try {
+                val res = ApiClient.api.getSentMovieInvitations()
+                if (res.isSuccessful && res.body() != null) {
+                    state = state.copy(sentMovieInvitations = res.body()!!)
+                } else {
+                    state = state.copy(
+                        error = res.errorBody()?.string() ?: "Failed to load sent invitations"
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(error = "Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun loadReceivedMovieInvitations() {
+        viewModelScope.launch {
+            try {
+                val res = ApiClient.api.getReceivedMovieInvitations()
+                if (res.isSuccessful && res.body() != null) {
+                    state = state.copy(receivedMovieInvitations = res.body()!!)
+                } else {
+                    state = state.copy(
+                        error = res.errorBody()?.string() ?: "Failed to load received invitations"
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(error = "Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun acceptMovieInvitation(id: Long) {
+        viewModelScope.launch {
+            try {
+                val res = ApiClient.api.acceptMovieInvitation(id)
+                if (res.isSuccessful) {
+                    state = state.copy(successMessage = "Invitation accepted")
+                    loadReceivedMovieInvitations()
+                } else {
+                    state = state.copy(
+                        error = res.errorBody()?.string() ?: "Failed to accept invitation"
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(error = "Network error: ${e.message}")
+            }
+        }
+    }
+
+    fun rejectMovieInvitation(id: Long) {
+        viewModelScope.launch {
+            try {
+                val res = ApiClient.api.rejectMovieInvitation(id)
+                if (res.isSuccessful) {
+                    state = state.copy(successMessage = "Invitation rejected")
+                    loadReceivedMovieInvitations()
+                } else {
+                    state = state.copy(
+                        error = res.errorBody()?.string() ?: "Failed to reject invitation"
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(error = "Network error: ${e.message}")
+            }
+        }
     }
 }

@@ -27,7 +27,8 @@ import com.example.hugbunadarver2.home.Movie
 @Composable
 fun BookingRoute(
     movie: Movie,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onInviteFriend: (Movie) -> Unit = {}
 ) {
     val vm: BookingViewModel = viewModel()
 
@@ -42,7 +43,8 @@ fun BookingRoute(
         onSelectScreening = vm::selectScreening,
         onSelectSeat = vm::selectSeat,
         onDiscountCodeChange = vm::onDiscountCodeChange,
-        onBook = { vm.createBooking(movie, onSuccess = onBack) }
+        onBook = { vm.createBooking(movie, onSuccess = onBack) },
+        onInviteFriend = { onInviteFriend(movie) }
     )
 }
 
@@ -54,7 +56,8 @@ fun BookingScreen(
     onSelectScreening: (Long) -> Unit,
     onSelectSeat: (Long) -> Unit,
     onDiscountCodeChange: (String) -> Unit,
-    onBook: () -> Unit
+    onBook: () -> Unit,
+    onInviteFriend: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -120,6 +123,13 @@ fun BookingScreen(
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             Text("Create booking")
+        }
+
+        Button(
+            onClick = onInviteFriend,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Invite friend to movie")
         }
 
         if (state.loading) {
