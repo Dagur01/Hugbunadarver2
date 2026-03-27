@@ -1,5 +1,8 @@
 package com.example.hugbunadarver2.admin
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +21,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,11 +43,17 @@ fun EditMovieScreen(
     onAgeRatingChange: (String) -> Unit,
     onDurationChange: (String) -> Unit,
     onNowShowingChange: (Boolean) -> Unit,
+    onUploadPoster: (Uri) -> Unit,
     onSubmit: () -> Unit,
     onCancel: () -> Unit
 ) {
     val genres = listOf("Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Sci-Fi", "Thriller")
     var genreExpanded by remember { mutableStateOf(false) }
+    val posterPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { selectedUri ->
+        selectedUri?.let(onUploadPoster)
+    }
 
     Column(
         modifier = Modifier
@@ -130,7 +140,7 @@ fun EditMovieScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Now Showing")
+            Text("Now Showing", style = MaterialTheme.typography.bodyLarge)
             Switch(
                 checked = state.nowShowing,
                 onCheckedChange = onNowShowingChange,
@@ -140,17 +150,32 @@ fun EditMovieScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
+        OutlinedButton(
+            onClick = { posterPickerLauncher.launch("image/*") },
+            enabled = !state.loading,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Upload Poster")
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
                 onClick = onCancel,
-                enabled = !state.loading
+                enabled = !state.loading,
+                modifier = Modifier.weight(1f)
             ) {
                 Text("Cancel")
             }
 
             Button(
                 onClick = onSubmit,
-                enabled = !state.loading
+                enabled = !state.loading,
+                modifier = Modifier.weight(1f)
             ) {
                 Text("Save Changes")
             }
@@ -165,6 +190,6 @@ fun EditMovieScreen(
             Spacer(Modifier.height(12.dp))
             Text(it, color = MaterialTheme.colorScheme.error)
         }
-    }
+            }
 }
 
