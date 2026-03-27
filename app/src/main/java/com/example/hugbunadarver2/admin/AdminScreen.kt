@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -31,6 +32,7 @@ enum class AdminPage {
 fun AdminRoute() {
     var currentPage by rememberSaveable { mutableStateOf(AdminPage.MAIN) }
     val vm: AdminViewModel = viewModel()
+    val context = LocalContext.current
 
     when (currentPage) {
         AdminPage.ADD_MOVIE -> {
@@ -79,6 +81,12 @@ fun AdminRoute() {
                 onAgeRatingChange = vm::onEditAgeRatingChange,
                 onDurationChange = vm::onEditDurationChange,
                 onNowShowingChange = vm::onEditNowShowingChange,
+                onUploadPoster = { uri ->
+                    vm.uploadMoviePoster(uri, context) {
+                        currentPage = AdminPage.SELECT_MOVIE_TO_EDIT
+                        vm.loadMoviesForSelection()
+                    }
+                },
                 onSubmit = {
                     vm.submitMovieEdit {
                         currentPage = AdminPage.MAIN

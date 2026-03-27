@@ -136,6 +136,13 @@ interface ApiService {
     @PATCH("movies/{movieId}")
     suspend fun updateMovie(@Path("movieId") movieId: Long, @Body movie: UpdateMovieRequest): Response<Movie>
 
+    @Multipart
+    @PATCH("movies/{movieId}/picture")
+    suspend fun uploadMoviePoster(
+        @Path("movieId") movieId: Long,
+        @Part file: MultipartBody.Part
+    ): ResponseBody
+
     /**
      * Booking
      */
