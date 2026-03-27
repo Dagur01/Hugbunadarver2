@@ -1,5 +1,6 @@
 package com.example.hugbunadarver2.mybookings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,25 +17,31 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MyBookingsRoute() {
     val vm: MyBookingsViewModel = viewModel()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        vm.loadBookings()
+        vm.loadBookings(context)
     }
 
     MyBookingsScreen(
         state = vm.state,
-        onRetry = vm::loadBookings,
-        onCancelBooking = vm::cancelBooking
+        onRetry = { vm.loadBookings(context) },
+        onCancelBooking = { bookingId -> vm.cancelBooking(context, bookingId) },
+        onShowQr = { bookingId -> vm.showBookingQr(context, bookingId) },
+        onHideQr = vm::hideBookingQr
     )
 }
 
@@ -41,7 +49,9 @@ fun MyBookingsRoute() {
 fun MyBookingsScreen(
     state: MyBookingsState,
     onRetry: () -> Unit,
-    onCancelBooking: (Long) -> Unit
+    onCancelBooking: (Long) -> Unit,
+    onShowQr: (Long) -> Unit,
+    onHideQr: () -> Unit
 ) {
     when {
         state.loading -> {
@@ -90,6 +100,16 @@ fun MyBookingsScreen(
                 contentPadding = PaddingValues(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                if (state.isOfflineData) {
+                    item {
+                        Text(
+                            text = "Offline mode: showing saved bookings",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
                 items(
                     items = state.bookings,
                     key = { it.bookingid }
@@ -119,10 +139,38 @@ fun MyBookingsScreen(
 
                             Spacer(modifier = Modifier.padding(6.dp))
 
+                            val isCurrentQr = state.selectedQrBookingId == booking.bookingid
+
+                            if (isCurrentQr && state.qrLoading) {
+                                CircularProgressIndicator()
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            if (isCurrentQr && state.qrBitmap != null) {
+                                Image(
+                                    bitmap = state.qrBitmap.asImageBitmap(),
+                                    contentDescription = "Booking QR",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(220.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                                if (isCurrentQr && state.qrBitmap != null) {
+                                    OutlinedButton(onClick = onHideQr) {
+                                        Text("Hide QR")
+                                    }
+                                } else {
+                                    OutlinedButton(onClick = { onShowQr(booking.bookingid) }) {
+                                        Text("Show QR")
+                                    }
+                                }
+
                                 Button(
                                     onClick = { onCancelBooking(booking.bookingid) }
                                 ) {
