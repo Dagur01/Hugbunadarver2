@@ -76,10 +76,7 @@ fun Hugbunadarver2App() {
     if (selectedMovieForBooking != null) {
         BookingRoute(
             movie = selectedMovieForBooking!!,
-            onBack = { selectedMovieForBooking = null },
-            onInviteFriend = { movie ->
-                selectedMovieForInvitation = movie
-            }
+            onBack = { selectedMovieForBooking = null }
         )
         return
     }
@@ -203,6 +200,9 @@ fun Hugbunadarver2App() {
                 onFilterGenre = homeVm::loadMoviesByGenre,
                 onBookMovie = { movie ->
                     selectedMovieForBooking = movie
+                },
+                onInviteFriend = { movie ->
+                    selectedMovieForInvitation = movie
                 }
             )
             AppDestinations.FAVORITES -> FavoritesScreen(
@@ -238,6 +238,9 @@ fun Hugbunadarver2App() {
                         onFilterGenre = homeVm::loadMoviesByGenre,
                         onBookMovie = { movie ->
                             selectedMovieForBooking = movie
+                        },
+                        onInviteFriend = { movie ->
+                            selectedMovieForInvitation = movie
                         }
                     )
                 }
