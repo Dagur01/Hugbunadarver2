@@ -27,7 +27,8 @@ import androidx.compose.runtime.*
 
 @Composable
 fun HomeRoute(
-    onBookMovie: (Movie) -> Unit
+    onBookMovie: (Movie) -> Unit,
+    onInviteFriend: (Movie) -> Unit
 ) {
     val vm: HomeViewModel = viewModel()
     HomeScreen(
@@ -35,7 +36,8 @@ fun HomeRoute(
         onRetry = vm::loadMovies,
         onToggleFavorite = vm::toggleFavorite,
         onFilterGenre = vm::loadMoviesByGenre,
-        onBookMovie = onBookMovie
+        onBookMovie = onBookMovie,
+        onInviteFriend = onInviteFriend
     )
 }
 
@@ -45,7 +47,8 @@ fun HomeScreen(
     onRetry: () -> Unit,
     onToggleFavorite: (Long) -> Unit,
     onFilterGenre: (String) -> Unit,
-    onBookMovie: (Movie) -> Unit
+    onBookMovie: (Movie) -> Unit,
+    onInviteFriend: (Movie) -> Unit
 ) {
     val genres = listOf("Action", "Drama", "Comedy", "Sci-Fi", "Horror")
     var selectedGenre by remember { mutableStateOf<String?>(null) }
@@ -124,7 +127,8 @@ fun HomeScreen(
                                 movie = movie,
                                 isFavorite = state.favoriteIds.contains(movie.movieId),
                                 onToggleFavorite = { onToggleFavorite(movie.movieId) },
-                                onBookMovie = {onBookMovie(movie)}
+                                onBookMovie = {onBookMovie(movie)},
+                                onInviteFriend = { onInviteFriend(movie) }
                             )
                         }
                     }
@@ -139,7 +143,8 @@ fun MovieCard(
     movie: Movie,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
-    onBookMovie: () -> Unit
+    onBookMovie: () -> Unit,
+    onInviteFriend: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -229,11 +234,22 @@ fun MovieCard(
                 }
                 Spacer(Modifier.height(8.dp))
 
+                Spacer(Modifier.height(8.dp))
+
                 Button(
                     onClick = onBookMovie,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Book")
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = onInviteFriend,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Invite friend")
                 }
             }
         }

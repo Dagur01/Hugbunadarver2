@@ -125,12 +125,6 @@ fun BookingScreen(
             Text("Create booking")
         }
 
-        Button(
-            onClick = onInviteFriend,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Invite friend to movie")
-        }
 
         if (state.loading) {
             CircularProgressIndicator()
