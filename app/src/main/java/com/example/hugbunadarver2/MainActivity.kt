@@ -37,11 +37,13 @@ import org.json.JSONObject
 import com.example.hugbunadarver2.booking.BookingRoute
 import com.example.hugbunadarver2.home.Movie
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.LocationOn
 import com.example.hugbunadarver2.mybookings.MyBookingsRoute
 import com.example.hugbunadarver2.friends.FriendProfileRoute
 import com.example.hugbunadarver2.friends.FriendRequestsRoute
 import com.example.hugbunadarver2.friends.FriendsRoute
 import com.example.hugbunadarver2.friends.MovieInvitationsRoute
+import com.example.hugbunadarver2.theater.TheaterMapScreen
 
 
 
@@ -148,6 +150,7 @@ fun Hugbunadarver2App() {
             AppDestinations.PROFILE,
             AppDestinations.MY_BOOKINGS,
             AppDestinations.FRIENDS,
+            AppDestinations.THEATER_MAP,
             AppDestinations.ADMIN
         )
     } else {
@@ -156,6 +159,7 @@ fun Hugbunadarver2App() {
             AppDestinations.FAVORITES,
             AppDestinations.MY_BOOKINGS,
             AppDestinations.FRIENDS,
+            AppDestinations.THEATER_MAP,
             AppDestinations.PROFILE
         )
     }
@@ -243,6 +247,7 @@ fun Hugbunadarver2App() {
                 }
             }
             AppDestinations.MY_BOOKINGS -> MyBookingsRoute()
+            AppDestinations.THEATER_MAP -> TheaterMapScreen()
         }
     }
 }
@@ -277,5 +282,6 @@ enum class AppDestinations(
     MY_BOOKINGS("Bookings", Icons.Default.List),
     PROFILE("Profile", Icons.Default.AccountBox),
     FRIENDS("Friends", Icons.Default.AccountBox),
+    THEATER_MAP("Theaters", Icons.Default.LocationOn),
     ADMIN("Admin", Icons.Default.AccountBox),
 }
