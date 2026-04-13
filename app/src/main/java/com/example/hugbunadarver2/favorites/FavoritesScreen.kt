@@ -1,3 +1,5 @@
+@file:Suppress("PackageDirectoryMismatch")
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,7 +46,8 @@ fun FavoritesScreen(
                 movie = movie,
                 isFavorite = true,
                 onToggleFavorite = { onToggleFavorite(movie.movieId) },
-                onBookMovie = { }
+                onBookMovie = { },
+                onInviteFriend = { }
             )
         }
     }

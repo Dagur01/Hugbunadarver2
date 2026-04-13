@@ -45,7 +45,9 @@ data class MovieHallDto(
     val movieHallId: Long,
     val name: String,
     val location: String,
-    val nowShowing: Boolean
+    val nowShowing: Boolean,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 data class SeatDto(
