@@ -46,6 +46,7 @@ import com.example.hugbunadarver2.friends.FriendRequestsRoute
 import com.example.hugbunadarver2.friends.FriendsRoute
 import com.example.hugbunadarver2.friends.MovieInvitationsRoute
 import com.example.hugbunadarver2.theater.TheaterMapScreen
+import com.example.hugbunadarver2.theater.TheaterMapViewModel
 
 
 
@@ -76,6 +77,7 @@ fun Hugbunadarver2App() {
     var authUiResetKey by rememberSaveable { mutableStateOf(0) }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val homeVm: HomeViewModel = viewModel()
+    val theaterVm: TheaterMapViewModel = viewModel()
     var selectedMovieForBooking by remember { mutableStateOf<com.example.hugbunadarver2.home.Movie?>(null) }
     var showFriendRequests by rememberSaveable { mutableStateOf(false) }
     var selectedFriendEmail by rememberSaveable { mutableStateOf<String?>(null) }
@@ -126,6 +128,12 @@ fun Hugbunadarver2App() {
     LaunchedEffect(isAdmin, currentDestination) {
         if (!isAdmin && currentDestination == AppDestinations.ADMIN) {
             currentDestination = AppDestinations.HOME
+        }
+        if (currentDestination == AppDestinations.FAVORITES) {
+            homeVm.loadFavorites()
+        }
+        if (currentDestination == AppDestinations.THEATER_MAP) {
+            theaterVm.reload()
         }
     }
 
@@ -261,7 +269,7 @@ fun Hugbunadarver2App() {
                 }
             }
             AppDestinations.MY_BOOKINGS -> MyBookingsRoute()
-            AppDestinations.THEATER_MAP -> TheaterMapScreen()
+            AppDestinations.THEATER_MAP -> TheaterMapScreen(viewModel = theaterVm)
         }
     }
 }
