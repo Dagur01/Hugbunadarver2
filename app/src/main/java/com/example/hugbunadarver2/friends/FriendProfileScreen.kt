@@ -110,11 +110,6 @@ fun FriendProfileScreen(
                 )
 
                 Text(
-                    text = if (profile.isFriend) "You are friends" else "Not friends",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
                     text = "Friends",
                     style = MaterialTheme.typography.titleMedium
                 )

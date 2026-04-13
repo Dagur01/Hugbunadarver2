@@ -32,7 +32,8 @@ class HomeViewModel : ViewModel() {
             try {
                 val response = ApiClient.api.getMovies()
                 if (response.isSuccessful && response.body() != null) {
-                    val moviesWithPosters = hydrateMoviesWithDetails(response.body()!!)
+                    val nowShowingMovies = response.body()!!.filter { it.nowShowing == true }
+                    val moviesWithPosters = hydrateMoviesWithDetails(nowShowingMovies)
                     state = state.copy(movies = moviesWithPosters, loading = false)
                 } else {
                     state = state.copy(
@@ -94,7 +95,8 @@ class HomeViewModel : ViewModel() {
                 val response = ApiClient.api.getMoviesByGenre(genre)
 
                 if (response.isSuccessful && response.body() != null) {
-                    val moviesWithPosters = hydrateMoviesWithDetails(response.body()!!)
+                    val nowShowingMovies = response.body()!!.filter { it.nowShowing == true }
+                    val moviesWithPosters = hydrateMoviesWithDetails(nowShowingMovies)
                     state = state.copy(
                         movies = moviesWithPosters,
                         loading = false
