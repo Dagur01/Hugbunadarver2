@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -184,11 +185,18 @@ fun TheaterMapScreen(viewModel: TheaterMapViewModel = viewModel()) {
         ) {
             if (theaters.isEmpty() && !isLoading) {
                 item {
-                    Text(
-                        text = "No theaters with location data available.",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "No theaters with location data available.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Button(
+                            onClick = { viewModel.reload() },
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text("Retry")
+                        }
+                    }
                 }
             }
             items(theaters) { item ->

@@ -31,9 +31,12 @@ class TheaterMapViewModel : ViewModel() {
         loadTheaters()
     }
 
+    fun reload() = loadTheaters()
+
     private fun loadTheaters() {
         viewModelScope.launch {
             mutableIsLoading.value = true
+            mutableError.value = null
             try {
                 val response = ApiClient.api.getMovieHalls()
                 if (response.isSuccessful) {

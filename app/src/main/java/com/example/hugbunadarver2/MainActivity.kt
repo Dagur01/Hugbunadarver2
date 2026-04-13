@@ -21,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.hugbunadarver2.auth.SessionManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hugbunadarver2.admin.AdminRoute
 import com.example.hugbunadarver2.auth.LoginRoute
@@ -44,6 +46,7 @@ import com.example.hugbunadarver2.friends.FriendRequestsRoute
 import com.example.hugbunadarver2.friends.FriendsRoute
 import com.example.hugbunadarver2.friends.MovieInvitationsRoute
 import com.example.hugbunadarver2.theater.TheaterMapScreen
+import com.example.hugbunadarver2.theater.TheaterMapViewModel
 
 
 
@@ -63,12 +66,18 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun Hugbunadarver2App() {
-    var token by rememberSaveable { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    var token by rememberSaveable {
+        val saved = SessionManager.getToken(context)
+        if (saved != null) ApiClient.setToken(saved)
+        mutableStateOf(saved)
+    }
     var showSignUp by rememberSaveable { mutableStateOf(false) }
     var showEditProfile by rememberSaveable { mutableStateOf(false) }
     var authUiResetKey by rememberSaveable { mutableStateOf(0) }
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val homeVm: HomeViewModel = viewModel()
+    val theaterVm: TheaterMapViewModel = viewModel()
     var selectedMovieForBooking by remember { mutableStateOf<com.example.hugbunadarver2.home.Movie?>(null) }
     var showFriendRequests by rememberSaveable { mutableStateOf(false) }
     var selectedFriendEmail by rememberSaveable { mutableStateOf<String?>(null) }
@@ -88,6 +97,7 @@ fun Hugbunadarver2App() {
             SignUpRoute(
                 onSignedUp = { newToken ->
                     ApiClient.setToken(newToken)
+                    SessionManager.saveToken(context, newToken)
                     token = newToken
 
                     homeVm.loadMovies()
@@ -100,6 +110,7 @@ fun Hugbunadarver2App() {
             LoginRoute(
                 onLoggedIn = { newToken ->
                     ApiClient.setToken(newToken)
+                    SessionManager.saveToken(context, newToken)
                     token = newToken
 
                     homeVm.loadMovies()
@@ -118,6 +129,12 @@ fun Hugbunadarver2App() {
         if (!isAdmin && currentDestination == AppDestinations.ADMIN) {
             currentDestination = AppDestinations.HOME
         }
+        if (currentDestination == AppDestinations.FAVORITES) {
+            homeVm.loadFavorites()
+        }
+        if (currentDestination == AppDestinations.THEATER_MAP) {
+            theaterVm.reload()
+        }
     }
 
     if (showEditProfile) {
@@ -129,6 +146,7 @@ fun Hugbunadarver2App() {
                 currentDestination = AppDestinations.PROFILE
             },
             onLogout = {
+                SessionManager.clearToken(context)
                 token = null
                 ApiClient.clearToken()
                 showSignUp = false
@@ -219,6 +237,7 @@ fun Hugbunadarver2App() {
                 token = token!!,
                 onNavigateToEditProfile = { showEditProfile = true },
                 onLogout = {
+                    SessionManager.clearToken(context)
                     token = null
                     ApiClient.clearToken()
                     showSignUp = false
@@ -250,7 +269,7 @@ fun Hugbunadarver2App() {
                 }
             }
             AppDestinations.MY_BOOKINGS -> MyBookingsRoute()
-            AppDestinations.THEATER_MAP -> TheaterMapScreen()
+            AppDestinations.THEATER_MAP -> TheaterMapScreen(viewModel = theaterVm)
         }
     }
 }
