@@ -4,20 +4,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +45,7 @@ fun BookingRoute(
     BookingScreen(
         movie = movie,
         state = vm.state,
+        onBack = onBack,
         onSelectHall = vm::selectHall,
         onSelectScreening = vm::selectScreening,
         onSelectSeat = vm::selectSeat,
@@ -52,6 +59,7 @@ fun BookingRoute(
 fun BookingScreen(
     movie: Movie,
     state: BookingState,
+    onBack: () -> Unit = {},
     onSelectHall: (Long) -> Unit,
     onSelectScreening: (Long) -> Unit,
     onSelectSeat: (Long) -> Unit,
@@ -66,7 +74,17 @@ fun BookingScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Book: ${movie.title}", style = MaterialTheme.typography.headlineSmall)
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+            Text("Book: ${movie.title}", style = MaterialTheme.typography.headlineSmall)
+        }
 
         Text("Choose hall")
         FlowRow(
