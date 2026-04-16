@@ -44,7 +44,8 @@ fun BookingRoute(
         onSelectSeat = vm::selectSeat,
         onDiscountCodeChange = vm::onDiscountCodeChange,
         onBook = { vm.createBooking(movie, onSuccess = onBack) },
-        onInviteFriend = { onInviteFriend(movie) }
+        onInviteFriend = { onInviteFriend(movie) },
+        onBack = onBack
     )
 }
 
@@ -57,7 +58,8 @@ fun BookingScreen(
     onSelectSeat: (Long) -> Unit,
     onDiscountCodeChange: (String) -> Unit,
     onBook: () -> Unit,
-    onInviteFriend: () -> Unit
+    onInviteFriend: () -> Unit,
+    onBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -136,6 +138,9 @@ fun BookingScreen(
 
         state.successMessage?.let {
             Text(it, color = MaterialTheme.colorScheme.primary)
+        }
+        Button(onClick = onBack) {
+            Text("Back")
         }
     }
 }
